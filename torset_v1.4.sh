@@ -477,9 +477,13 @@ echo "Correct setup WAN and LAN." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 uci -q del network.wan.device
 uci -q del network.wan6.device
-uci set network.wan.device='wan'
+if [ $DEVICE = "vmware-inc-vmware7-1" ]; then
+  uci set network.wan.device='eth1'
+else
+  uci set network.wan.device='wan'
+  uci set network.wan.macaddr=$MACADDR
+fi
 uci set network.wan.proto='dhcp'
-if [ ! $DEVICE = "vmware-inc-vmware7-1" ]; then uci set network.wan.macaddr=$MACADDR; fi
 uci set network.wan.ipv6='0'
 uci set network.wan.hostname='*'
 
