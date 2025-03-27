@@ -5,7 +5,7 @@
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
-# mrt 2025 v1.4a            torset_v1.4.sh
+# mrt 2025 v1.4a            torset_v1.5.sh
 #
 # Docs & info in KINGSTON/OpenWrt/TorRouter.script/TorRouter_build_AVM4040_DGDodo2.txt
 # ../P2812/TSTscripts/TorRouterSetup/torset_v1.4.sh (LD865)
@@ -15,11 +15,14 @@
 #
 # tor version: 0.4.8.16
 
-# if /etc/tor/torchk.sh is installed, add /etc/crontab/root with: '0 * * * * /etc/tor/torchk.sh'
-# Add /etc/tor/ within /etc/sysupgrade.conf ( all TOR related scripts should end in /etc/tor/ )
+# - Removed wan6 and adjusted wan for TorRouter use.
+#    Difference in vmware vs other hw: macaddr within wan definition.
+# - Add /etc/tor/ within /etc/sysupgrade.conf ( all TOR related scripts should be in /etc/tor/ )
 #
 # - Added test & adjust if /etc/tor/nftables.d/tor/sh is executable.
 # - Added /etc/tor/torchk.sh
+# - If /etc/tor/torchk.sh is installed, add /etc/crontab/root with: '0 * * * * /etc/tor/torchk.sh'
+#
 # - Adjusted program sequence and some needed checks, packages need to be installed, for example:
 #   before commands can be used, luci-app-commands is needed.
 #   For Privoxy adjustments, privoxy needs to be installed etc.
@@ -139,6 +142,9 @@ fi
 # AVM4040 = avm,fritzbox-4040
 #           AVM FRITZ!Box 4040
 #
+# Our vm devices can have 2 different lower case names (BIOS vs EFI, Other 4.x or later Linux (64-bit)).
+# For program here we set both to vmware-inc-vmware7-1
+if [ $DEVICE = "vmware-inc-vmware-virtual-platform" ]; then $DEVICE="vmware-inc-vmware7-1"; fi
 
 # Check MAC address parameters
 # ----------------------------
@@ -469,11 +475,13 @@ uci commit system
 # Set WAN
 echo "Correct setup WAN and LAN." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
-uci set network.wan6.device='wan'
-uci set network.wan6.proto='dhcp'
-uci set network.wan6.macaddr=$MACADDR
-uci set network.wan6.ipv6='0'
-uci set network.wan6.hostname='*'
+uci -q del network.wan.device
+uci -q del network.wan6.device
+uci set network.wan.device='wan'
+uci set network.wan.proto='dhcp'
+if [ ! $DEVICE = "vmware-inc-vmware7-1" ]; then uci set network.wan.macaddr=$MACADDR; fi
+uci set network.wan.ipv6='0'
+uci set network.wan.hostname='*'
 
 # Set LAN
 uci set network.lan=interface
