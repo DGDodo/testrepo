@@ -290,7 +290,7 @@ fi
 # if version is lower then v19.07.0 only WPA2 (PSK2) is available for WIFICRYPT
 # if password length is long enough (8) WIFICRYPT='SAE'
 WIFICRYPT='psk2'
-if [ $(echo $OPENVER | cut -f1 -d.) -ge 19 ] && [ ${#WIFIPASS} -gt 7 ]; then WIFICRYPT='sae'; fi
+if [ $(echo $OPENVER | cut -f1 -d.) -ge 19 ] && [ ${#WIFIPASS} -gt 7 ]; then WIFICRYPT='sae-mixed'; fi
 
 # SPECIAL for P-2812HNU-F1 (MACADDR & MACWIFI)
 # =start======================================
