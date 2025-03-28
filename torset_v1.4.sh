@@ -38,7 +38,7 @@
 HOSTNAME=TorRouter
 
 # Set TorRouter default ip
-IPADDR=192.168.120.1
+IPADDR=192.168.100.1
 
 # Set ipaddr2 as copy of ipaddr ending with 0 instead of 1
 IPADDR2=$(echo "$IPADDR". | cut -d'.' -f-3).0
@@ -475,8 +475,9 @@ uci commit system
 # Set WAN
 echo "Correct setup WAN and LAN." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
-uci -q del network.wan.device
-uci -q del network.wan6.device
+uci -q del network.wan=interface
+uci -q del network.wan6=interface
+uci set network.wan=interface
 if [ $DEVICE = "vmware-inc-vmware7-1" ]; then
   uci set network.wan.device='eth1'
 else
