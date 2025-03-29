@@ -64,7 +64,7 @@ SERVICES="privoxy firewall dnsmasq tor network"
 OUTPUT=/tmp/TR001.log
 OUTPUT2=/etc/tor/TR001.log
 
-# Set minimum free memory 60MB
+# Set minimum free memory 60MB=60000kB
 FREEMIN=60000
 
 # Get / check program parameters
