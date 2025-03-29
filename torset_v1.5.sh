@@ -65,6 +65,7 @@ OUTPUT=/tmp/TR001.log
 OUTPUT2=/etc/tor/TR001.log
 
 # Set minimum free memory 65MB=65000kB
+# Should we ask to stop Tor if it is running before memcheck?
 FREEMIN=65000
 
 # Get / check program parameters
