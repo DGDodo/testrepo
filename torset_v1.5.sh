@@ -196,6 +196,17 @@ OPENVER=$(cat /etc/openwrt_release | grep RELEASE | cut -f2 -d\')
 
 # Memory CHECK ($FREECUR $FREEMIN)
 FREECUR=$(free | grep Mem | grep -o '[^ ]*$')
+if [ "$FREECUR" -le "$FREEMIN" ] && [ "$(service tor status)" = "running"  ]; then
+  echo "Tor is running now and takes a lot of memory."
+  read -p "Should we stop Tor to free memory? (y/N)" userinput;
+  if [ -z $userinput ]; then userinput=n; fi
+  if [ "$userinput" = "y" ]; then
+    service tor stop
+    sleep 2
+    FREECUR=$(free | grep Mem | grep -o '[^ ]*$')
+    echo ""
+  fi
+fi
 if [ "$FREECUR" -le "$FREEMIN" ]; then
   echo "        =============";
   echo "        !! WARNING !!";
