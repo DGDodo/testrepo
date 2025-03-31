@@ -243,7 +243,7 @@ fi
 #
 # P2812 returns   : /sys/devices/pci0000:00/0000:00:0e.0/ieee80211/phy0/macaddress
 # For the P2812 the extra command in /etc/rc.local should be run before any result!
-#
+# If not done already the script will run the extra command
 if [ "$DEVICE" = "zyxel,p-2812hnu-f1" ] && [ $(echo $OPENVER | cut -f1 -d.) -ge 21  ] && [ -f /etc/rc.local ] && [ -z $(cat /etc/rc.local | grep "echo 1 > /sys/bus/pci/rescan") ]; then
   echo "Check if P2812 see Wifi after special command... (duration over 10 seconds)"
   echo "When fully run this program, '/etc/rc.local' will be adjusted."
