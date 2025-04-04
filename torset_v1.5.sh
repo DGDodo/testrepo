@@ -5,7 +5,7 @@
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
-# mrt 2025 v1.4a            torset_v1.5.sh
+# apr 2025 v1.4a            torset_v1.5.sh
 #
 # Docs & info in KINGSTON/OpenWrt/TorRouter.script/TorRouter_build_AVM4040_DGDodo2.txt
 # ../P2812/TSTscripts/TorRouterSetup/torset_v1.4.sh (LD865)
