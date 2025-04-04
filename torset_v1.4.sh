@@ -1,7 +1,5 @@
 #!/bin/sh
 #
-# --- TEST - VERSION --- TEST - VERSION --- TEST - VERSION --- TEST - VERSION --- TEST - VERSION ---
-#
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
