@@ -5,6 +5,21 @@
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
+# This script is for OpenWrt devices: Fritz!box 4040, vmware x86_64, Linksys WHW03 v2
+# Removed is the ZyXEL P2812 F1 as the setup needs more memory.
+#
+# dec 2025 v1.5
+#
+# Added: program version to output etc.
+#        Linksys WHW03 v2 - testing
+#          Wan mac = lan mac -1 (testing)
+#          Has 3 Wifi radios (check if the tool works with these 3) - testing
+#
+# Changed: tor version 0.4.8.21
+#
+# To do: Check WHW03 if the tool works with these 3 wifi's
+#
+
 # apr 2025 v1.4a            torset_v1.5.sh
 #
 # Docs & info in KINGSTON/OpenWrt/TorRouter.script/TorRouter_build_AVM4040_DGDodo2.txt
@@ -33,6 +48,9 @@
 #
 # Set static Parameters
 # ---------------------
+
+# Set program version
+Pversion=1.5
 
 # Set hostname TorRouter
 HOSTNAME=TorRouter
@@ -142,6 +160,7 @@ fi
 #           ZyXEL P-2812HNU-F1
 # AVM4040 = avm,fritzbox-4040
 #           AVM FRITZ!Box 4040
+# Linksys = linksys,whw03v2
 #
 # Our vm devices can have 2 different lower case names (BIOS vs EFI, Other 4.x or later Linux (64-bit)).
 # For program here we set both to vmware-inc-vmware7-1
@@ -154,6 +173,7 @@ if [ $DEVICE = "vmware-inc-vmware-virtual-platform" ]; then $DEVICE="vmware-inc-
 # VMware          : MACADDR=$(cat /sys/class/net/eth1/address)
 # P2812           : MACADDR=<Lan mac + 2hex>
 # AVM4040         : MACADDR=$(cat /sys/class/net/wan/address)
+# Linksys         : MACADDR=<Lan mac - 1hex>
 # Working OpenWrt : MACADDR=$(cat /sys/class/net/wan/address)
 # All others use  : MACADDR=$(cat /sys/class/net/wan/address)  ??
 
@@ -330,8 +350,30 @@ if [ "$DEVICE" = "zyxel,p-2812hnu-f1" ]; then
     fi
   fi
 fi
-# =end==============================
-# SPECIAL for P-2812HNU-F1 (MACADDR)
+# =end========================================
+# SPECIAL for P-2812HNU-F1 (MACADDR & MACWIFI)
+
+# -- 
+
+# SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
+# =start==========================================
+
+# On default OpenWrt the Linksys could return all the same mac addresses for br-lan, lan and wan
+# If so, we do change the wan to [lan-1] if not done already.
+# In rare situation mac address could end with '00', then we will change wan to end with 'ff'.
+if [ "$DEVICE" = "linksys,whw03v2" ]; then
+  if [ "$MACADDR" = "$MACLAN" ]; then
+    if [ "$(printf "%d" 0x${MACADDR: -2})" -ge 1 ]; then
+      MACADDR=$(printf $(echo $MACADDR | cut -c 1-15); printf "%x\n" $((0x${MACADDR: -2}-0x01)))
+    else
+      MACADDR=$(echo $MACADDR | cut -c 1-15)ff;
+    fi
+  fi
+fi
+# =end============================================
+# SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
+
+# --
 
 # Additional check for programs and installed packaged like Privoxy & Tor
 
@@ -367,7 +409,7 @@ if [ -f /etc/tor/torchk.sh ] && [ ! -z $vCurl ]; then vTorchk="('torchk.sh' will
 # Print info, all info seems to be ok to change to TorRouter.
 echo "" | tee -a "$OUTPUT"
 echo "'"$HOSTNAME"' setup program for device : "$(cat /tmp/sysinfo/model) | tee -a "$OUTPUT"
-echo "================================================================" | tee -a "$OUTPUT"
+echo "======================================================= v"$Pversion" ===" | tee -a "$OUTPUT"
 echo "                                 "$(date -R) | tee -a "$OUTPUT"
 echo "Parameters ( Please double check these! )" | tee -a "$OUTPUT"
 echo "----------" | tee -a "$OUTPUT"
