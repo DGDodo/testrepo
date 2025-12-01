@@ -18,7 +18,7 @@
 # Changed: tor version 0.4.8.21
 #
 # To do: Check WHW03 if the tool works with these 3 wifi's
-#
+#        Check if torchk.sh and torsetup_v1.5.sh are executable after building version.
 
 # apr 2025 v1.4a            torset_v1.5.sh
 #
@@ -34,7 +34,7 @@
 #    Difference in vmware vs other hw: macaddr within wan definition.
 # - Add /etc/tor/ within /etc/sysupgrade.conf ( all TOR related scripts should be in /etc/tor/ )
 #
-# - Added test & adjust if /etc/tor/nftables.d/tor/sh is executable.
+# - Added test & adjust if /etc/tor/nftables.d/tor.sh is executable.
 # - Added /etc/tor/torchk.sh
 # - If /etc/tor/torchk.sh is installed, add /etc/crontab/root with: '0 * * * * /etc/tor/torchk.sh'
 #
