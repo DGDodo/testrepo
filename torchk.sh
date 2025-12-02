@@ -1,29 +1,26 @@
 #!/bin/sh
 #
-#     mrt 2025 v1.1                  torchk.sh
-# torchk7.sh
+#     dec 2025 v1.2                  torchk.sh
 #
-# Program uses tor and curl to check.torproject.org
-# Return using Tor correctly or not.
+# Program uses Tor and curl to grab check.torproject.org
+# It is used with TorRouter to check good working Tor every hour, with crontab.
+# Returns using Tor correctly or not.
 
 # - Added curl check if installed
 # - Added /etc/tor/torchk.log (output of script)
-# - Added check tor = running
-# - Added tor ip in log
+# - Added check Tor = running
+# - Added Tor ip in log
 # - Added get local lan ip
 # - Added log header and adjusted output layout
-# - Used with TorRouter to check good working tor every hour, with crontab
+# - Added Program version (also in log output, v1.2)
 
 # Used:
 # - /etc/tor/torchk.sh                  - Folder holds 'this script' and its output-file
 # - /etc/tor/torchk.log                 - The actual 'log file'
 # - /tmp/torchk.html                    - Holds 'collected data'
 
-echo ""
-echo "========================================"
-echo "            TorRouter Check        v1.1"
-echo "========================================"
-echo "Start:      "$(date)
+# Program version
+Pversion=1.2
 
 # Set log parameter
 OUTPUT=/etc/tor/torchk.log
@@ -48,20 +45,31 @@ DEVICE=$(ubus call system board | grep board_name | cut -f4 -d\")
 # Get lan ip
 lanip=$(uci show | grep lan.ipaddr | cut -d\' -f2)
 
+# Screen header
+echo ""
+echo "========================================"
+echo "            TorRouter Check        v"$Pversion
+echo "========================================"
+echo "Start:      "$(date)
+
+# Log header
 if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "running" ]; then
   if [ ! -f $OUTPUT  ]; then
     printf "%-6s| %-29s| %-16s| %s\n" progID Date IP Info > $OUTPUT
-    echo "------+------------------------------+-----------------+--------------------------------------" >> $OUTPUT
+    echo "------+------------------------------+-----------------+------------------------------- v"$Pversion" -" >> $OUTPUT
   fi
+# Screen info
   printf "%-12s %27s\n" "Output:" "$OUTPUT"
   printf "%-29s %10d\n" "Program ID:" "$progid"
   printf "%-12s %27s\n" "Device:" "$(cat /tmp/sysinfo/model)"
+# Grab & check https://check.torproject.org
   if [ ! -f $filestr1 ]; then
     curl -x socks5h://$lanip:9050 --connect-timeout 10 -o $filestr1 https://check.torproject.org 2>/dev/null
     if [ -f $filestr1  ]; then
       check=$(cat $filestr1 | grep -m 1 "Congrat")
       torip=$(cat $filestr1 | grep strong | cut -f3 -d'>' | cut -f1 -d'<')
       torstr=$(echo ${check/browser/device} | cut -f2- -d' ')
+# Log & screen info
       if [ -n "$check" ]; then
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "$torstr" >> $OUTPUT
       else
@@ -77,5 +85,6 @@ else
   if [ $progid -eq 0 ]; then echo "Package 'curl' is not installed."; fi
 fi
 
+# End
 echo "Stop:       "$(date)
 echo ""
