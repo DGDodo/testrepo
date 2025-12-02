@@ -6,7 +6,7 @@
 #          SCRIPT TORROUTER SETUP
 # ========================================
 # This script is for OpenWrt devices: Fritz!box 4040, vmware x86_64, Linksys WHW03 v2
-# Removed is the ZyXEL P2812 F1 as the setup needs more memory.
+# Removed is the ZyXEL P2812 F1 as the setup needs too much memory.
 #
 # dec 2025 v1.5
 #
@@ -17,8 +17,8 @@
 #
 # Changed: tor version 0.4.8.21
 #
-# To do: Check WHW03 if the tool works with these 3 wifi's
-#        Check if torchk.sh and torsetup_v1.5.sh are executable after building version.
+# To do: Check WHW03 if the tool works with the 3 wifi's (DONE)
+#        Check if torchk.sh and torsetup_v1.5.sh are executable after building version. (DONE)
 
 # apr 2025 v1.4a            torset_v1.5.sh
 #
