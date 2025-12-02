@@ -541,6 +541,7 @@ fi
 uci set network.wan.proto='dhcp'
 uci set network.wan.ipv6='0'
 uci set network.wan.hostname='*'
+uci set network.wan.peerdns='0'
 
 # Set LAN
 uci set network.lan=interface
