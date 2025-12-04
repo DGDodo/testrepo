@@ -15,7 +15,7 @@
 #
 # Changed: tor version 0.4.8.21
 #
-# To do:
+# To do: Adjust LED's according torchk.sh (device independed) ?
 
 # apr 2025 v1.4a
 #
