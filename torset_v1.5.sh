@@ -1,29 +1,23 @@
 #!/bin/sh
 #
-# --- TEST - VERSION --- TEST - VERSION --- TEST - VERSION --- TEST - VERSION --- TEST - VERSION ---
-#
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
+# dec 2025 v1.5
+#
 # This script is for OpenWrt devices: Fritz!box 4040, vmware x86_64, Linksys WHW03 v2
 # Removed is the ZyXEL P2812 F1 as the setup needs too much memory.
 #
-# dec 2025 v1.5
-#
-# Added: program version to output etc.
-#        Linksys WHW03 v2 - testing
-#          Wan mac = lan mac -1 (testing)
-#          Has 3 Wifi radios (check if the tool works with these 3) - testing
+# Added: - program version to output etc.
+# Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
+#                            - Check if the tool works with these 3 Wifi radios
+#        - Check if torchk.sh and torsetup_v1.5.sh are executable after building version.
 #
 # Changed: tor version 0.4.8.21
 #
-# To do: Check WHW03 if the tool works with the 3 wifi's (DONE)
-#        Check if torchk.sh and torsetup_v1.5.sh are executable after building version. (DONE)
+# To do:
 
-# apr 2025 v1.4a            torset_v1.5.sh
-#
-# Docs & info in KINGSTON/OpenWrt/TorRouter.script/TorRouter_build_AVM4040_DGDodo2.txt
-# ../P2812/TSTscripts/TorRouterSetup/torset_v1.4.sh (LD865)
+# apr 2025 v1.4a
 #
 # TorRouter v24+ builds for F4040 & vmware have all needed packages, files and scripts installed.
 # Almost all needed files are also in this build, although some are made within this script.
@@ -37,51 +31,41 @@
 # - Added test & adjust if /etc/tor/nftables.d/tor.sh is executable.
 # - Added /etc/tor/torchk.sh
 # - If /etc/tor/torchk.sh is installed, add /etc/crontab/root with: '0 * * * * /etc/tor/torchk.sh'
-#
+
 # - Adjusted program sequence and some needed checks, packages need to be installed, for example:
 #   before commands can be used, luci-app-commands is needed.
 #   For Privoxy adjustments, privoxy needs to be installed etc.
-#
 
 # 1) INIT
 # =======
 #
 # Set static Parameters
 # ---------------------
-
 # Set program version
 Pversion=1.5
-
 # Set hostname TorRouter
 HOSTNAME=TorRouter
-
 # Set TorRouter default ip
 IPADDR=192.168.100.1
-
 # Set ipaddr2 as copy of ipaddr ending with 0 instead of 1
 IPADDR2=$(echo "$IPADDR". | cut -d'.' -f-3).0
-
 # Set hardcoded Lan MAC address when it is empty according program
 # For P2812-F1 (and maybe some others) this must end on 0 or 8 !
 # Normally the program will grab the correct mac addresses.
 MACHARD=00:11:22:33:44:50
-
 # Set default Wifi name & pass (if nothing is being filled in)
 WIFINAME=TorRouter
 WIFIPASS=TorRouter1234
 # Upper parameters could be overwritten in program so we keep ...
 WIFINAME2=$WIFINAME
 WIFIPASS2=$WIFIPASS
-
 # Set services to be stopped during setup process in sequence.
 # Make sure 'network' is mentioned last here.
 # Sequence is now "privoxy firewall dnsmasq tor network"
 SERVICES="privoxy firewall dnsmasq tor network"
-
 # Set program output parameters
 OUTPUT=/tmp/TR001.log
 OUTPUT2=/etc/tor/TR001.log
-
 # Set minimum free memory 65MB=65000kB
 # Should we ask to stop Tor if it is running before memcheck?
 FREEMIN=65000
@@ -295,7 +279,7 @@ done
 
 # Check if more then 1 wifi devices (count>1)
 if [ $count -gt 1 ]; then
-  echo "Only 1 wifi name and password is asked and used for all wifis."
+  echo "Only 1 wifi name and password is asked and used for all wifi radios."
 fi
 
 # Ask for Wifi SSID & WPA2 info off the box, if there is any wifi.
@@ -460,11 +444,9 @@ if [ "$userinput" != "y" ]; then
   exit;
 fi
 
-
 # echo "" | tee -a "$OUTPUT"
 # date -R | tee -a "$OUTPUT"
 #  echo "" | tee -a "$OUTPUT"
-
 
 # echo "Versions:"
 # echo "Privoxy       : "$vPriv
@@ -478,8 +460,6 @@ fi
 # echo "Mac addr        : "$MACADDR
 # echo "OpenWrt version : "$OPENVER
 echo ""
-
-#exit
 
 #
 # 2) PROGRAM
