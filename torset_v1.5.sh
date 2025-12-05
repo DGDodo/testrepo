@@ -678,7 +678,7 @@ echo "--------------------------------------------------------------------------
 # Disable DNS forwarding for dhcp
 echo "Disable DNS forwarding for LAN dhcp." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
-# uci set dhcp.@dnsmasq[0].port="0"
+uci set dhcp.@dnsmasq[0].port="0"
 
 # Additional network settings
 echo "Additional network settings." | tee -a "$OUTPUT"
