@@ -344,7 +344,7 @@ if [ $count -ge 1 ]; then
   echo "For wireless encryption 'SAE' the password MUST be at"
   echo "least 8 characters."
   echo ""
-  echo "Devices with more than 1 wifi device will get all the"
+  echo "Devices with more than 1 wifi radio will get all the"
   echo "same name and pass, they can be adjusted afterwards."
   echo ""
   read -p "Enter SSID, normally from the device itself: " WIFINAME;
