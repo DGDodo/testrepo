@@ -447,7 +447,7 @@ if [ $count -ge 1 ]; then
   B=0
   for a in $MACARRAY; do
     let B++
-    echo "Wifi number        : "$B | tee -a "$OUTPUT"
+    echo "Wifi radio         : "$B | tee -a "$OUTPUT"
     echo "Wifi name          : "$WIFINAME"  (pass: "$WIFIPASS")" | tee -a "$OUTPUT"
     if [ $B -eq 1 ]; then echo "Wifi MAC address   : "$MACWIFI | tee -a "$OUTPUT"; fi
     if [ $B -ne 1 ]; then echo "Wifi MAC address   : "$(cat $a) | tee -a "$OUTPUT"; fi
