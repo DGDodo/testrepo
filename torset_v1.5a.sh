@@ -5,13 +5,16 @@
 # ========================================
 # dec 2025 v1.5a
 #
+# For use http://TorRouter.nl
+#
 # This script is for OpenWrt devices: Fritz!box 4040, vmware x86_64, Linksys WHW03 v2
-# Removed is the ZyXEL P2812 F1 as the setup needs too much memory.
+# All the ZyXEL P2812 F1 items will be removed as TorRouter setup needs too much memory.
 #
 # Added:         - program version for output etc.
 # Added & Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
 #                                    - Check if the tool works with these 3 Wifi radios
 # Fixed:         - Check if torchk.sh and torsetup_v1.5.sh are executable after building version.
+#                - irqbalance version also shown for WHW03 v2
 #
 # New TorRouter builds have the following files/scripts already in them:
 #  - torset_V1.5.sh	This script (creates also TR001.log)
@@ -20,7 +23,8 @@
 #  - torsocks.conf and torrc_generated will begenerated bij Tor itself.
 #  - Latest version of Tor (0.4.8.21)
 #
-# To do: Adjust LED's according torchk.sh (device independed)
+# To do: - Remove all P2812 items (add to own P2812 program)
+#        - Adjust LED's according torchk.sh (device independed)
 
 # apr 2025 v1.4a
 #
@@ -57,8 +61,13 @@ echo ""
 echo "'"$HOSTNAME"' setup program."
 echo "======================================================= v"$Pversion" ==="
 echo "                                 "$(date -R)
-echo "Get and check program parameters ..."
+echo "This script is for the following OpenWrt devices:"
+echo " - Fritz!box 4040"
+echo " - Linksys WHW03 v2"
+echo " - VMware x86_64"
+echo " It will install TorRouter fully functional.
 echo ""
+echo "Get and check program parameters ..."
 
 #
 # Set static Parameters
@@ -89,6 +98,8 @@ OUTPUT2=/etc/tor/TR001.log
 FREEMIN=65000
 
 sleep 1
+echo ""
+
 # Get / check program parameters
 # ------------------------------
 
@@ -305,7 +316,7 @@ fi
 #As this device as 3 wifi radios.
 #
 # Get all wifi devices. MACARRAY will hold all locations, count hold number of wifis
-# For do loop needed & $(cat $a) to get the mac addres(ses)
+# -For do- loop needed & $(cat $a) to get the mac addres(ses)
 # MACWIFI holds first macaddress as it will be changed for P2812 (later)
 #
 MACARRAY=$(find /sys | grep phy | grep macaddress)
@@ -319,9 +330,7 @@ done
 # We found '$count' number of wifi devices
 
 # Check if more then 1 wifi devices (count>1)
-if [ $count -gt 1 ]; then
-  echo "Only 1 wifi name and password is asked and used for all wifi radios."
-fi
+if [ $count -gt 1 ]; then echo "Only 1 wifi name and password is asked and used for all wifi radios."; fi
 
 # Ask for Wifi SSID & WPA2 info off the box, if there is any wifi.
 if [ $count -ge 1 ]; then
@@ -349,7 +358,7 @@ fi
 
 # Create WAN mac address, default WAN mac address is wrong (eth0).
 # LAN MAC address is 'off the box' and working.
-# So we need the MAC address of the box (will be LAN).
+# So we need the MAC address of the box (will be LAN / br-lan).
 # We add '#02' (hex) to the box address for WAN MAC and add '#04' for first WIFI MAC.
 if [ "$DEVICE" = "zyxel,p-2812hnu-f1" ]; then
   if [ "${MACLAN: -1}" = 0 ]; then
@@ -382,6 +391,7 @@ if [ $(echo $OPENVER | cut -f1 -d.) -ge 19 ] && [ ${#WIFIPASS} -gt 7 ]; then WIF
 
 # Get package versions:
 # ---------------------
+
 # Get Privoxy version:
 vPriv=$(opkg list-installed | grep 'privoxy' | grep -v 'luci-' | cut -c 11-)
 if [ ${#vPriv} -eq 0 ]; then vPriv="not installed"; fi
@@ -390,6 +400,10 @@ if [ ${#vPriv} -eq 0 ]; then vPriv="not installed"; fi
 vTor=$(opkg list-installed | grep 'tor - ' | grep -v 'luci-' | cut -c 7-)
 if [ ${#vTor} -eq 0 ]; then vTor="not installed"; fi
 
+# Get irqbalance version (F4040 & WHW03):
+vIrqb=$(opkg list-installed | grep irqbalance | grep -v luci | cut -f3 -d' ')
+if [ ${#vIrqb} -eq 0 ]; then vIrqb="not installed"; fi
+
 # Get curl version:
 vCurl=$(opkg list-installed | grep 'curl - ' | cut -c 8-)
 if [ ${#vCurl} -eq 0 ]; then vCurl="not installed"; fi
@@ -397,10 +411,6 @@ if [ ${#vCurl} -eq 0 ]; then vCurl="not installed"; fi
 # Get luci-app-commands version:
 vLAC=$(opkg list-installed | grep 'luci-app-commands' | cut -c 21-)
 if [ ${#vLAC} -eq 0 ]; then vLAC="not installed"; fi
-
-# Get irqbalance version (F4040 & WHW03):
-vIrqb=$(opkg list-installed | grep irqbalance | grep -v luci | cut -f3 -d' ')
-if [ ${#vIrqb} -eq 0 ]; then vIrqb="not installed"; fi
 
 # Check if /etc/tor/torchk.sh exist and add text to vCurl ?
 if [ -f /etc/tor/torchk.sh ] && [ ! -z $vCurl ]; then vTorchk="('torchk.sh' will be activated)"; fi
@@ -417,8 +427,8 @@ echo "" | tee -a "$OUTPUT"
 echo "'"$HOSTNAME"' setup program for device : "$(cat /tmp/sysinfo/model) | tee -a "$OUTPUT"
 echo "======================================================= v"$Pversion" ===" | tee -a "$OUTPUT"
 echo "                                 "$(date -R) | tee -a "$OUTPUT"
-echo "Parameters ( Please double check these! )" | tee -a "$OUTPUT"
-echo "----------" | tee -a "$OUTPUT"
+echo "Parameters - Please double check these!" | tee -a "$OUTPUT"
+echo "---------- - All programs should be installed!" | tee -a "$OUTPUT"
 echo "Router Name        : "$HOSTNAME"  (on device: "$(cat /tmp/sysinfo/model)")" | tee -a "$OUTPUT"
 echo "OpenWrt version    : "$OPENVER | tee -a "$OUTPUT"
 echo "Tor version        : "$vTor | tee -a "$OUTPUT"
@@ -467,7 +477,7 @@ if [ "$userinput" != "y" ]; then
 fi
 echo ""
 
-
+# TEMPORARLY
 exit
 
 #
@@ -477,6 +487,8 @@ exit
 # Install additional (missing?) packages here ?
 # Only if WAN is active / working ? Clean OpenWrt on WHW03 v2 does not have working WAN!
 #
+# First adjust / check all needed files here before continue?
+# Or at the end ...
 
 # Stop services
 echo "Stop services." | tee -a "$OUTPUT"
@@ -544,7 +556,7 @@ uci set network.lan.ipv6='0'
 uci commit network
 
 # Adjust tor settings (1. Tor client)
-# Create /etc/tor/custom, if not already exist.
+# Creates /etc/tor/custom, if not already exist.
 #
 echo "Add tor settings." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
