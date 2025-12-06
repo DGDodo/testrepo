@@ -657,6 +657,8 @@ uci add_list dhcp.@dnsmasq[0].server="::1#9053"
 #  Adjust tor settings (3. Firewall)
 #
 # Adjust firewall settings / Intercept TCP traffic
+# /etc/nftables.d/tor.sh will be created if not already exist
+#
 echo "Adjust firewall settings." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 if [ ! -f /etc/nftables.d/tor.sh ]; then
@@ -807,13 +809,6 @@ if [ ! "$vLAC" = "not installed" ]; then
     uci del luci.@command[-1].param
     uci del luci.@command[-1].public
   fi
-#  uci add luci command
-#  uci set luci.@command[-1].param='0'
-#  uci set luci.@command[-1].public='0'
-#  uci set luci.@command[-1].name='Device-banner'
-#  uci set luci.@command[-1].command='cat /etc/banner'
-#  uci del luci.@command[-1].param
-#  uci del luci.@command[-1].public
   uci commit luci
 fi
 
@@ -901,7 +896,7 @@ uci show >> $OUTPUT
 # Write end info
 echo "" | tee -a "$OUTPUT"
 echo "                                 "$(date -R) | tee -a "$OUTPUT"
-echo "================================================================" | tee -a "$OUTPUT"
+echo "======================================================= v"$Pversion" ===" | tee -a "$OUTPUT"
 echo "Program will reboot '"$DEVICE"' in 5 seconds ... CTRL-C will break."
 echo "Stopped services will NOT be started! A reboot is required!"
 echo "And the REBOOT will be performed."
