@@ -405,8 +405,10 @@ if [ ${#vIrqb} -eq 0 ]; then vIrqb="not installed"; fi
 # Check if /etc/tor/torchk.sh exist and add text to vCurl ?
 if [ -f /etc/tor/torchk.sh ] && [ ! -z $vCurl ]; then vTorchk="('torchk.sh' will be activated)"; fi
 
-#  service |grep tor
-#  service |grep privoxy
+# Check if some processes are running?
+# service |grep tor
+# service |grep privoxy - this does not work! Privoxy looks stopped, use 'ps | grep privoxy | grep -v root'
+# if [ -z $(ps|grep "privoxy"|grep -v "root"|cut -d" " -f1) ]; then echo "Prog draait niet!"; else echo "Prog is running."; fi
 
 # Start of $OUTPUT
 # Print info, all info seems to be ok to change to TorRouter.
