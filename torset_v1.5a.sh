@@ -5,9 +5,9 @@
 # ========================================
 # dec 2025 v1.5a
 #
-# For use http://TorRouter.nl
+# For use with http://TorRouter.nl
 #
-# This script is for OpenWrt devices: Fritz!box 4040, vmware x86_64, Linksys WHW03 v2
+# This script is for OpenWrt devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64
 # All the ZyXEL P2812 F1 items will be removed as TorRouter setup needs too much memory.
 #
 # Added:         - program version for output etc.
@@ -65,7 +65,8 @@ echo "This script is for the following OpenWrt devices:"
 echo " - Fritz!box 4040"
 echo " - Linksys WHW03 v2"
 echo " - VMware x86_64"
-echo " It will install TorRouter fully functional.
+echo "It will install TorRouter fully functional and will 'crash'/end"
+echo "when run on any other device."
 echo ""
 echo "Get and check program parameters ..."
 
@@ -149,11 +150,12 @@ fi
 # Get DEVICE from /tmp/sysinfo/board_name (OpenWrt)
 # or from ubus call system board | grep board_name | cut -f4 -d\" process
 # Empty if not OpenWrt. but different OpenWrt versions return different names ?
+# Program crash/end here when not run on a OpenWrt device.
 #
 DEVICE=""
 if [ -f /tmp/sysinfo/board_name ]; then DEVICE=$(cat /tmp/sysinfo/board_name); fi
 # If not found, use the jsonfilter example:
-if [ -z $DEVICE ]; then DEVICE=$(ubus call system board | grep board_name | cut -f4 -d\"); fi
+if [ -z $DEVICE ] && [ -f /bin/ubus ]; then DEVICE=$(ubus call system board | grep board_name | cut -f4 -d\"); fi
 
 # Check if DEVICE is an OpenWrt 0ne, ex1t if not.
 if [ -z $DEVICE ]; then
@@ -172,7 +174,7 @@ fi
 #           AVM FRITZ!Box 4040
 # Linksys = linksys,whw03v2
 #
-# Our vm devices can have 2 different lower case names (BIOS vs EFI, Other 4.x or later Linux (64-bit)).
+# Our vm devices can have 2 different lower case names ragerding BIOS vs EFI, Other 4.x or later Linux (64-bit).
 # For program here we set both to vmware-inc-vmware7-1
 if [ $DEVICE = "vmware-inc-vmware-virtual-platform" ]; then $DEVICE="vmware-inc-vmware7-1"; fi
 
@@ -241,7 +243,7 @@ fi
 # SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
 
 # Get current OpenWrt version
-# As the wlan mac location for v24.10.0 is different from older versions ?? to be tested on lower P2812 ...
+# As the wlan mac location for v24.10.0 is different from older versions ??
 # Wifi encryption is depending on OpenWrt version (wpa2 or sae).
 OPENVER=$(cat /etc/openwrt_release | grep RELEASE | cut -f2 -d\')
 
@@ -415,7 +417,7 @@ if [ ${#vLAC} -eq 0 ]; then vLAC="not installed"; fi
 # Check if /etc/tor/torchk.sh exist and add text to vCurl ?
 if [ -f /etc/tor/torchk.sh ] && [ ! -z $vCurl ]; then vTorchk="('torchk.sh' will be activated)"; fi
 
-# Check if some processes are running?
+# Check if processes are running?
 # service |grep tor
 # service |grep privoxy - this does not work! Privoxy looks stopped, use 'ps | grep privoxy | grep -v root'
 # if [ -z $(ps|grep "privoxy"|grep -v "root"|cut -d" " -f1) ]; then echo "Prog draait niet!"; else echo "Prog is running."; fi
