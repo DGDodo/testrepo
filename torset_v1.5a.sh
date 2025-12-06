@@ -17,7 +17,7 @@
 #                - irqbalance version also shown for WHW03 v2
 #
 # New TorRouter builds have the following files/scripts already in them:
-#  - torset_V1.5.sh	This script (creates also TR001.log)
+#  - torset_V1.5.sh	This script (creates also /tmp/TR001.log and -finally- /etc/tor/TR001.log)
 #  - torchk.sh		Tor check script runs every hour to test Tor (and creates torchk.log)
 #  - torrc, custom and nftables.d/tor.sh for use with Tor
 #  - torsocks.conf and torrc_generated will begenerated bij Tor itself.
