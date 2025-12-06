@@ -257,8 +257,8 @@ if [ "$FREECUR" -le "$FREEMIN" ] && [ "$(service tor status)" = "running"  ]; th
     service tor stop
     sleep 2
     FREECUR=$(free | grep Mem | grep -o '[^ ]*$')
-    echo ""
   fi
+  echo ""
 fi
 if [ "$FREECUR" -le "$FREEMIN" ]; then
   echo "        =============";
