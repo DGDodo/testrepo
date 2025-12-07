@@ -25,6 +25,7 @@
 #
 # To do: - Remove all P2812 items (add to own P2812 program)
 #        - Adjust LED's according torchk.sh (device independed)
+#        - Check irqbalance differences F4040 vs WHW03
 
 # apr 2025 v1.4a
 #
