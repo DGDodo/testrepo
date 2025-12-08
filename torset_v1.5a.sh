@@ -203,7 +203,7 @@ fi
 # Get default WAN mac address:
 if [ -f /sys/class/net/wan/address ]; then MACADDR=$(cat /sys/class/net/wan/address); fi
 # if empty we try the 'find /sys' methode:
-if [ -z $MACADDR ] && [ ! -z $(find /sys | grep wan | grep address) ]; then MACADDR=$(cat $(find /sys | grep wan | grep address)); fi
+if [ -z $MACADDR ] && [ -n $(find /sys | grep wan | grep address) ]; then MACADDR=$(cat $(find /sys | grep wan | grep address)); fi
 # if empty try eth1 (VMware) location:
 if [ -z $MACADDR ] && [ -f /sys/class/net/eth1/address ]; then MACADDR=$(cat /sys/class/net/eth1/address); fi
 # if still empty, ask for WAN mac input:
@@ -403,15 +403,15 @@ vIrqb=$(opkg list-installed | grep irqbalance | grep -v luci | cut -f3 -d' ')
 if [ ${#vIrqb} -eq 0 ]; then vIrqb="not installed"; fi
 
 # Get curl version:
+# And check if /etc/tor/torchk.sh exist and add text to vCurl
 vCurl=$(opkg list-installed | grep 'curl - ' | cut -c 8-)
-if [ ${#vCurl} -eq 0 ]; then vCurl="not installed"; fi
+if [ ${#vCurl} -eq 0 ]; then vCurl="not installed"; else
+  if [ -f /etc/tor/torchk.sh ]; then vTorchk="('torchk.sh' will be activated)"; fi
+fi
 
 # Get luci-app-commands version:
 vLAC=$(opkg list-installed | grep 'luci-app-commands' | cut -c 21-)
 if [ ${#vLAC} -eq 0 ]; then vLAC="not installed"; fi
-
-# Check if /etc/tor/torchk.sh exist and add text to vCurl ?
-if [ -f /etc/tor/torchk.sh ] && [ ! -z $vCurl ]; then vTorchk="('torchk.sh' will be activated)"; fi
 
 # Check if processes are running?
 # service |grep tor
@@ -873,7 +873,7 @@ EOF
 fi
 
 # Adjust uHTTPd https setting:
-if [ ! -z "$(opkg list-installed | grep 'luci-ssl-')" ]; then
+if [ -n "$(opkg list-installed | grep 'luci-ssl-')" ]; then
   uci set uhttpd.main.redirect_https='on'
   uci commit uhttpd
 fi
