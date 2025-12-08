@@ -565,6 +565,8 @@ uci commit network
 echo "Add tor settings." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 if [ ! -f /etc/tor/custom ]; then
+  echo "Creating file: /etc/tor/custom" | tee -a "$OUTPUT"
+  echo "" | tee -a "$OUTPUT"
   cat << EOF > /etc/tor/custom
 AutomapHostsOnResolve 1
 AutomapHostsSuffixes .
@@ -575,6 +577,9 @@ DNSPort [::]:9053
 TransPort 0.0.0.0:9040
 TransPort [::]:9040
 EOF
+else
+  echo "File: '/etc/tor/custom' already exist." | tee -a "$OUTPUT"
+  echo "" | tee -a "$OUTPUT"
 fi
 uci del_list tor.conf.tail_include="/etc/tor/custom"
 uci add_list tor.conf.tail_include="/etc/tor/custom"
@@ -585,10 +590,13 @@ uci commit tor
 # Adjust /etc/rc.local if not done already
 if [ "$DEVICE" = "avm,fritzbox-4040" ]; then
   if [ "$vIrqb" = "not installed" ]; then
-    echo " - Package 'irqbalance' is not installed." | tee -a "$OUTPUT"
+    echo " - Package 'irqbalance' is not installed!" | tee -a "$OUTPUT"
+    echo "" | tee -a "$OUTPUT"
   else
-    if [ -f /etc/rc.local ] && [ -z $(cat /etc/rc.local | grep "echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor") ]; then
+#   if [ -f /etc/rc.local ] && [ -z $(cat /etc/rc.local | grep "echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor") ]; then
+    if [ -f /etc/rc.local ] && ! grep -q "echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor" /etc/rc.local; then
       echo " - Adjusting '/etc/rc.local'." | tee -a "$OUTPUT"
+      echo "" | tee -a "$OUTPUT"
       cp /etc/rc.local /etc/rc.old.local
       rm -rf /etc/rc.local
       cat /etc/rc.old.local | grep -v "exit 0" > /etc/rc.local
@@ -604,6 +612,9 @@ echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
 
 exit 0
 EOF
+    else 
+      echo "File: 'rc.local' already adjusted." | tee -a "$OUTPUT"
+      echo "" | tee -a "$OUTPUT"
     fi
   fi
 fi
@@ -611,8 +622,9 @@ fi
 # F4040 only end
 
 # Adjust /etc/sysupgrade.conf if not done already.
-if [ -f /etc/sysupgrade.conf ] && [ -z $(cat /etc/sysupgrade.conf | grep "/etc/tor") ]; then
+if ! grep -q "/etc/tor" /etc/sysupgrade.conf; then
   echo " - Adjusting '/etc/sysupgrade.conf'." | tee -a "$OUTPUT"
+  echo"" | tee -a "$OUTPUT"
   cp /etc/sysupgrade.conf /etc/sysupgrade.old.conf
   rm -rf /etc/sysupgrade.conf
   cat /etc/sysupgrade.old.conf | grep -v "# /etc/example.conf" | grep -v "# /etc/openvpn/" > /etc/sysupgrade.conf
@@ -628,6 +640,9 @@ if [ -f /etc/sysupgrade.conf ] && [ -z $(cat /etc/sysupgrade.conf | grep "/etc/t
 # /etc/example.conf
 # /etc/openvpn/
 EOF
+else 
+  echo "File: '/etc/sysupgrade.conf' already adjusted." | tee -a "$OUTPUT"
+  echo"" | tee -a "$OUTPUT"
 fi
 
 #  Adjust tor settings (2. DNS over Tor)
@@ -673,8 +688,8 @@ handle ${TOR_RULE##* } \
 fib daddr type != { local, broadcast } ${TOR_RULE}
 EOF
 fi
-# Check / make /etc/tor/nftables.d/tor/sh executable:
-if [ -f /etc/nftables.d/tor.sh ] && [ ! "$(ls -al /etc/nftables.d/tor.sh | cut -c -4 | cut -c 4)" = "x" ]; then
+# Check & make /etc/tor/nftables.d/tor/sh executable:
+if [ ! -x /etc/nftables.d/tor.sh ]; then
   chmod +x /etc/nftables.d/tor.sh
 fi
 uci -q delete firewall.tor_nft
@@ -691,7 +706,7 @@ uci set firewall.tcp_int.family="any"
 uci set firewall.tcp_int.target="DNAT"
 
 # Disable LAN to WAN forwarding
-echo " Disable LAN to WAN forwarding." | tee -a "$OUTPUT"
+echo "Disable LAN to WAN forwarding." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 uci -q delete firewall.@forwarding[0]
 # uci commit firewall
@@ -700,7 +715,7 @@ uci -q delete firewall.@forwarding[0]
 #                                         with also the torscript of OpenWrt.
 
 # Intercept IPv6 DNS traffic
-echo " Intercept IPv6 DNS traffic." | tee -a "$OUTPUT"
+echo "Intercept IPv6 DNS traffic." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 # drop invalid packets
 uci del firewall.@defaults[0].syn_flood
@@ -747,7 +762,7 @@ if [ ! "$vCurl" = "not installed" ];then
   if [ -f /etc/tor/torchk.sh ] && [ ! -f /etc/crontabs/root ]; then
     echo "0 * * * * /etc/tor/torchk.sh" > /etc/crontabs/root
   else
-    if [[ -z "$(cat /etc/crontabs/root | grep '/etc/tor/torchk.sh')" ]]; then
+    if ! grep -q "/etc/tor/torchk.sh" /etc/tor/torchk.sh; then
       echo "0 * * * * /etc/tor/torchk.sh" >> /etc/crontabs/root
     fi
   fi
