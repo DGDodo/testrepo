@@ -673,7 +673,7 @@ handle ${TOR_RULE##* } \
 fib daddr type != { local, broadcast } ${TOR_RULE}
 EOF
 fi
-# Test if /etc/tor/nftables.d/tor/sh is executable:
+# Check / make /etc/tor/nftables.d/tor/sh executable:
 if [ -f /etc/nftables.d/tor.sh ] && [ ! "$(ls -al /etc/nftables.d/tor.sh | cut -c -4 | cut -c 4)" = "x" ]; then
   chmod +x /etc/nftables.d/tor.sh
 fi
@@ -709,11 +709,11 @@ uci set firewall.@defaults[0].drop_invalid='1'
 uci commit firewall
 
 # Enable DNS over Tor
-echo "Enable DNS over Tor." | tee -a "$OUTPUT"
-echo "--------------------------------------------------------------------------------" >> $OUTPUT
+# echo "Enable DNS over Tor." | tee -a "$OUTPUT"
+# echo "--------------------------------------------------------------------------------" >> $OUTPUT
 # uci set dhcp.@dnsmasq[0].boguspriv="0"
 
-# Disable DNS forwarding for dhcp
+# Disable DNS forwarding for dhcp LAN
 echo "Disable DNS forwarding for LAN dhcp." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 uci set dhcp.@dnsmasq[0].port="0"
