@@ -403,7 +403,8 @@ vIrqb=$(opkg list-installed | grep irqbalance | grep -v luci | cut -f3 -d' ')
 if [ ${#vIrqb} -eq 0 ]; then vIrqb="not installed"; fi
 
 # Get curl version:
-# And check if /etc/tor/torchk.sh exist and add text to vCurl
+# And check if /etc/tor/torchk.sh exist and add text vTorchk to vCurl
+vTorchk=""
 vCurl=$(opkg list-installed | grep 'curl - ' | cut -c 8-)
 if [ ${#vCurl} -eq 0 ]; then vCurl="not installed"; else
   if [ -f /etc/tor/torchk.sh ]; then vTorchk="('torchk.sh' will be activated)"; fi
