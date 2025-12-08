@@ -11,9 +11,10 @@
 # All the ZyXEL P2812 F1 items will be removed as TorRouter setup needs too much memory.
 #
 # Added:         - program version for output etc.
+#                - program start / input header 
 # Added & Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
 #                                    - Check if the tool works with these 3 Wifi radios
-# Fixed:         - Check if torchk.sh and torsetup_v1.5.sh are executable after building version.
+# Fixed:         - Check if torchk.sh and torsetup_v1.5.sh are executable within building version.
 #                - irqbalance version also shown for WHW03 v2
 #
 # New TorRouter builds have the following files/scripts already in them:
@@ -55,25 +56,6 @@
 Pversion=1.5
 # Set hostname TorRouter
 HOSTNAME=TorRouter
-
-# Program Input Header
-clear
-echo ""
-echo "'"$HOSTNAME"' setup program."
-echo "======================================================= v"$Pversion" ==="
-echo "                                 "$(date -R)
-echo "This script is for the following OpenWrt devices:"
-echo " - Fritz!box 4040"
-echo " - Linksys WHW03 v2"
-echo " - VMware x86_64"
-echo "It will install TorRouter fully functional and will 'crash'/end"
-echo "when run on any other device."
-echo ""
-echo "Get and check program parameters ..."
-
-#
-# Set static Parameters
-# ---------------------
 # Set TorRouter default ip
 IPADDR=192.168.100.1
 # Set ipaddr2 as copy of ipaddr ending with 0 instead of 1
@@ -99,7 +81,20 @@ OUTPUT2=/etc/tor/TR001.log
 # Should we ask to stop Tor if it is running before memcheck?
 FREEMIN=65000
 
-sleep 1
+# Program Input Header
+clear
+echo ""
+echo "'"$HOSTNAME"' setup program."
+echo "======================================================= v"$Pversion" ==="
+echo "                                 "$(date -R)
+echo "This script is for the following OpenWrt devices:"
+echo " - Fritz!box 4040"
+echo " - Linksys WHW03 v2"
+echo " - VMware x86_64"
+echo "It will install TorRouter fully functional and will 'crash'/end"
+echo "when run on any other device."
+echo ""
+echo "Get and check program parameters ..."
 echo ""
 
 # Get / check program parameters
