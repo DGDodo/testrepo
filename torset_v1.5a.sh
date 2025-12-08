@@ -624,7 +624,7 @@ fi
 # Adjust /etc/sysupgrade.conf if not done already.
 if ! grep -q "/etc/tor" /etc/sysupgrade.conf; then
   echo " - Adjusting '/etc/sysupgrade.conf'." | tee -a "$OUTPUT"
-  echo"" | tee -a "$OUTPUT"
+  echo "" | tee -a "$OUTPUT"
   cp /etc/sysupgrade.conf /etc/sysupgrade.old.conf
   rm -rf /etc/sysupgrade.conf
   cat /etc/sysupgrade.old.conf | grep -v "# /etc/example.conf" | grep -v "# /etc/openvpn/" > /etc/sysupgrade.conf
@@ -642,7 +642,7 @@ if ! grep -q "/etc/tor" /etc/sysupgrade.conf; then
 EOF
 else 
   echo "File: '/etc/sysupgrade.conf' already adjusted." | tee -a "$OUTPUT"
-  echo"" | tee -a "$OUTPUT"
+  echo "" | tee -a "$OUTPUT"
 fi
 
 #  Adjust tor settings (2. DNS over Tor)
@@ -679,6 +679,8 @@ uci add_list dhcp.@dnsmasq[0].server="::1#9053"
 echo "Adjust firewall settings." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 if [ ! -f /etc/nftables.d/tor.sh ]; then
+  echo "Create & make executable file: '/etc/nftables.d/tor.sh'" | tee -a "$OUTPUT"
+  echo "" | tee -a "$OUTPUT"
   cat << "EOF" > /etc/nftables.d/tor.sh
 TOR_CHAIN="dstnat_$(uci -q get firewall.tcp_int.src)"
 TOR_RULE="$(nft -a list chain inet fw4 ${TOR_CHAIN} \
@@ -687,6 +689,9 @@ nft replace rule inet fw4 ${TOR_CHAIN} \
 handle ${TOR_RULE##* } \
 fib daddr type != { local, broadcast } ${TOR_RULE}
 EOF
+else
+  echo "File: '/etc/nftables.d/tor.sh' already exist." | tee -a "$OUTPUT"
+  echo "" | tee -a "$OUTPUT"
 fi
 # Check & make /etc/tor/nftables.d/tor/sh executable:
 if [ ! -x /etc/nftables.d/tor.sh ]; then
@@ -758,6 +763,8 @@ fi
 
 # if /etc/tor/torchk.sh then check if /etc/crontab/root exist and holds torchk.sh already, if not add it
 # depends also on curl
+echo "Check & adjust crontab." | tee -a "$OUTPUT"
+echo "--------------------------------------------------------------------------------" >> $OUTPUT
 if [ ! "$vCurl" = "not installed" ];then
   if [ -f /etc/tor/torchk.sh ] && [ ! -f /etc/crontabs/root ]; then
     echo "0 * * * * /etc/tor/torchk.sh" > /etc/crontabs/root
@@ -894,6 +901,8 @@ EOF
 fi
 
 # Adjust uHTTPd https setting:
+echo "Change / adjust webserver settings." | tee -a "$OUTPUT"
+echo "--------------------------------------------------------------------------------" >> $OUTPUT
 if [ -n "$(opkg list-installed | grep 'luci-ssl-')" ]; then
   uci set uhttpd.main.redirect_https='on'
   uci commit uhttpd
