@@ -327,10 +327,12 @@ do
 done
 
 # We found '$count' number of wifi devices
-
+echo ""
+echo "Wireless settings"
+echo "================="
+echo ""
 # Check if more then 1 wifi devices (count>1)
 if [ $count -gt 1 ]; then echo "Only 1 wifi name and password is asked and used for all wifi radios."; fi
-
 # Ask for Wifi SSID & WPA2 info off the box, if there is any wifi.
 if [ $count -ge 1 ]; then
   if [ $count -eq 1 ]; then echo "Here you can ENTER the SSID and it's password / key."; fi
