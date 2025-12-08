@@ -416,7 +416,7 @@ if [ ${#vLAC} -eq 0 ]; then vLAC="not installed"; fi
 # Check if processes are running?
 # service |grep tor
 # service |grep privoxy - this does not work! Privoxy looks stopped, use 'ps | grep privoxy | grep -v root'
-# if [ -z $(ps|grep "privoxy"|grep -v "root"|cut -d" " -f1) ]; then echo "Prog draait niet!"; else echo "Prog is running."; fi
+# if [ -n "$(ps|grep "privoxy"|grep -v "root")" ]; then echo "running"; else echo "Prog is NOT running."; fi
 
 # Start of $OUTPUT
 # Print info, all info seems to be ok to change to TorRouter.
@@ -487,6 +487,11 @@ exit
 #
 # First adjust / check all needed files here before continue?
 # Or at the end ...
+
+# Example: check if irqbalance is enabled & does its config file exist?
+# if [ -f /etc/config/irqbalance ]; then 
+#   if [ -n "$(cat /etc/config/irqbalance | grep enabled | grep 1)" ]; then echo "enabled"; else echo "disabled"; fi
+# fi
 
 # Stop services
 echo "Stop services." | tee -a "$OUTPUT"
