@@ -24,7 +24,7 @@
 #  - torsocks.conf and torrc_generated will begenerated bij Tor itself.
 #  - Latest version of Tor (0.4.8.21)
 #
-# To do: - F4040 WAN mac - LAN mac +1
+# To do: - F4040 WAN mac = LAN mac + 1
 #        - Remove all P2812 items (add to own P2812 program)
 #        - Adjust LED's according torchk.sh (device independed)
 #        - Check irqbalance differences F4040 vs WHW03
@@ -223,6 +223,8 @@ if [ -z $MACADDR ]; then
     MACADDR=$MACHARD;
   fi
 fi
+
+# Check if MACADDR = MACLAN
 
 # SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
 # =start==========================================
