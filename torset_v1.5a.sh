@@ -182,7 +182,8 @@ if [ $DEVICE = "vmware-inc-vmware-virtual-platform" ]; then $DEVICE="vmware-inc-
 # Other devices like VMware have already right WAN mac
 # VMware          : MACADDR=$(cat /sys/class/net/eth1/address)
 # P2812           : MACADDR=<Lan mac + 2hex>
-# AVM4040         : MACADDR=$(cat /sys/class/net/wan/address)
+# AVM4040         : MACADDR=$(cat /sys/class/net/wan/address)  ??
+#                   Seems not to be ... Mac wan = MAC lan + 1hex
 # Linksys         : MACADDR=<Lan mac - 1hex>
 # Working OpenWrt : MACADDR=$(cat /sys/class/net/wan/address)
 # All others use  : MACADDR=$(cat /sys/class/net/wan/address)  ??
