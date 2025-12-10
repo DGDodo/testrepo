@@ -10,8 +10,8 @@
 # This script is for OpenWrt devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64
 # All the ZyXEL P2812 F1 items will be removed as TorRouter setup needs too much memory.
 #
-# Added:         - program version for output etc.
-#                - program start / input header 
+# Added:         - Program version for output etc.
+#                - Program start / input header 
 # Added & Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
 #                                    - Check if the tool works with these 3 Wifi radios
 # Fixed:         - Make sure irqbalance is started
@@ -939,9 +939,11 @@ fi
 # Make sure irqbalance is started
 echo "Check and start irqbalance settings." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
-if [ -z $(uci show irqbalance.irqbalance.enabled | grep 1) ]; then
-  uci set irqbalance.irqbalance.enabled='1'
-  uci commit irqbalance
+if [ ! $vIrqb = "not installed" ]; then 
+  if [ -z $(uci show irqbalance.irqbalance.enabled | grep 1) ]; then
+    uci set irqbalance.irqbalance.enabled='1'
+    uci commit irqbalance
+  fi
 fi
 
 #
