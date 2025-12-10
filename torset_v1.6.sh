@@ -16,11 +16,11 @@
 #                                    - Check if the tool works with these 3 Wifi radios
 # Fixed:         - Make sure irqbalance is started
 #                - Fritzbox F4040 WAN mac = LAN mac + 1
-#                - Check if torchk.sh and torsetup_v1.5.sh are executable within building version.
+#                - Check if torchk.sh and torsetup_v1.x.sh are executable within building version.
 #                - irqbalance version also shown for WHW03 v2
 #
 # New TorRouter builds have the following files/scripts already in them:
-#  - torset_V1.5.sh	This script (creates also /tmp/TR001.log and -finally- /etc/tor/TR001.log)
+#  - torset_v1.x.sh	This script (creates also /tmp/TR001.log and -finally- /etc/tor/TR001.log)
 #  - torchk.sh		Tor check script runs every hour to test Tor (and creates torchk.log)
 #  - torrc, custom and nftables.d/tor.sh for use with Tor
 #  - torsocks.conf and torrc_generated will begenerated bij Tor itself.
