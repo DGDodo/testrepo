@@ -93,7 +93,7 @@ echo " - Fritz!box 4040"
 echo " - Linksys WHW03 v2"
 echo " - VMware x86_64"
 echo ""
-echo "It will install TorRouter fully functional and will 'crash'/end"
+echo "It will install TorRouter fully functional and will 'crash' / end"
 echo "when run on any other device."
 echo ""
 echo "Get and check program parameters ..."
@@ -195,11 +195,11 @@ if [ -z $MACLAN ]; then
 fi
 # If empty it is not OpenWrt ?
 if [ -z $MACLAN ]; then
-  echo "This '"$DEVICE"'is most probably NOT a good working (OpenWrt) device for '"$HOSTNAME"'.";
+  echo "This '"$DEVICE"' is most probably NOT a good working (OpenWrt) device for '"$HOSTNAME"'.";
   echo "Lan MAC address is empty?";
-#  echo "No OpenWrt device name is found: '"$DEVICE"'.";
+ #  echo "No OpenWrt device name is found: '"$DEVICE"'.";
   echo "Could also be that the device is running in 'failsafe'?";
-  echo "Make sure the router work 'normal', not in 'failsafe'."'
+  echo "Make sure the router work 'normal', not in 'failsafe'.";
   echo "Program will end now.";
   echo "";
   exit;
