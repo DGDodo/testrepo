@@ -504,7 +504,7 @@ fi
 echo ""
 
 # TEMPORARLY
-exit
+#exit
 
 #
 # 2) PROGRAM
