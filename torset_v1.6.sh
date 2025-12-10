@@ -14,7 +14,8 @@
 #                - program start / input header 
 # Added & Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
 #                                    - Check if the tool works with these 3 Wifi radios
-# Fixed:         - Fritzbox F4040 WAN mac = LAN mac + 1
+# Fixed:         - Make sure irqbalance is started
+#                - Fritzbox F4040 WAN mac = LAN mac + 1
 #                - Check if torchk.sh and torsetup_v1.5.sh are executable within building version.
 #                - irqbalance version also shown for WHW03 v2
 #
@@ -460,7 +461,7 @@ echo "OpenWrt version    : "$OPENVER | tee -a "$OUTPUT"
 echo "Tor version        : "$vTor | tee -a "$OUTPUT"
 echo "Curl version       : "$vCurl"  "$vTorchk | tee -a "$OUTPUT"
 echo "Privoxy version    : "$vPriv | tee -a "$OUTPUT"
-if [ ${#vIrqb} -ne 0 ]; then echo "Irqbalance version : "$vIrqb | tee -a "$OUTPUT"; fi
+if [ ! $vIrqb = "not installed" ]; then echo "Irqbalance version : "$vIrqb | tee -a "$OUTPUT"; fi
 echo "" | tee -a "$OUTPUT"
 echo "IP address LAN     : "$IPADDR | tee -a "$OUTPUT"
 echo "LAN MAC address    : "$MACLAN | tee -a "$OUTPUT"
@@ -933,6 +934,14 @@ echo "--------------------------------------------------------------------------
 if [ -n "$(opkg list-installed | grep 'luci-ssl-')" ]; then
   uci set uhttpd.main.redirect_https='on'
   uci commit uhttpd
+fi
+
+# Make sure irqbalance is started
+echo "Check and start irqbalance settings." | tee -a "$OUTPUT"
+echo "--------------------------------------------------------------------------------" >> $OUTPUT
+if [ -z $(uci show irqbalance.irqbalance.enabled | grep 1) ]; then
+  uci set irqbalance.irqbalance.enabled='1'
+  uci commit irqbalance
 fi
 
 #
