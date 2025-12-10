@@ -3,7 +3,7 @@
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
-# dec 2025 v1.5a
+# dec 2025 v1.6
 #
 # For use with http://TorRouter.nl
 #
@@ -14,7 +14,8 @@
 #                - program start / input header 
 # Added & Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
 #                                    - Check if the tool works with these 3 Wifi radios
-# Fixed:         - Check if torchk.sh and torsetup_v1.5.sh are executable within building version.
+# Fixed:         - Fritzbox F4040 WAN mac = LAN mac + 1
+#                - Check if torchk.sh and torsetup_v1.5.sh are executable within building version.
 #                - irqbalance version also shown for WHW03 v2
 #
 # New TorRouter builds have the following files/scripts already in them:
@@ -24,8 +25,7 @@
 #  - torsocks.conf and torrc_generated will begenerated bij Tor itself.
 #  - Latest version of Tor (0.4.8.21)
 #
-# To do: - F4040 WAN mac = LAN mac + 1
-#        - Remove all P2812 items (add to own P2812 program)
+# To do: - Remove all P2812 items (add to own P2812 program)
 #        - Adjust LED's according torchk.sh (device independed)
 #        - Check irqbalance differences F4040 vs WHW03
 
@@ -54,7 +54,7 @@
 # Set static Parameters
 # ---------------------
 # Set program version
-Pversion=1.5
+Pversion=1.6
 # Set hostname TorRouter
 HOSTNAME=TorRouter
 # Set TorRouter default ip
@@ -178,8 +178,8 @@ if [ $DEVICE = "vmware-inc-vmware-virtual-platform" ]; then $DEVICE="vmware-inc-
 
 # Check MAC address parameters
 # ----------------------------
-# We only change WAN mac if device is a P2812 ... or?
-# Other devices like VMware have already right WAN mac
+# We only change WAN mac if device is a P2812 ... or all?
+# Other devices like VMware have already right WAN mac.
 # VMware          : MACADDR=$(cat /sys/class/net/eth1/address)
 # P2812           : MACADDR=<Lan mac + 2hex>
 # AVM4040         : MACADDR=$(cat /sys/class/net/wan/address)  ??
@@ -195,9 +195,11 @@ if [ -z $MACLAN ]; then
 fi
 # If empty it is not OpenWrt ?
 if [ -z $MACLAN ]; then
-  echo "This is most probably NOT a good working (OpenWrt) device for '"$HOSTNAME"'.";
-  echo "Lan MAC address is "$MACLAN".";
-  echo "No OpenWrt device name is found: '"$DEVICE"'.";
+  echo "This '"$DEVICE"'is most probably NOT a good working (OpenWrt) device for '"$HOSTNAME"'.";
+  echo "Lan MAC address is empty?";
+#  echo "No OpenWrt device name is found: '"$DEVICE"'.";
+  echo "Could also be that the device is running in 'failsafe'?";
+  echo "Make sure the router work 'normal', not in 'failsafe'."'
   echo "Program will end now.";
   echo "";
   exit;
@@ -225,23 +227,41 @@ if [ -z $MACADDR ]; then
 fi
 
 # Check if MACADDR = MACLAN
+# This could be in normal operation, but here we want different mac addresses.
+#
+if [ "$MACADDR" = "$MACLAN" ]; then
 
-# SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
-# =start==========================================
-# On default OpenWrt the Linksys could return all the same mac addresses for br-lan, lan and wan
-# If so, we do change the wan to [lan-1] if not done already.
-# In rare situation mac address could end with '00', then we will change wan to end with 'ff'.
-if [ "$DEVICE" = "linksys,whw03v2" ]; then
-  if [ "$MACADDR" = "$MACLAN" ]; then
+ # SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
+ # =start==========================================
+ # On default OpenWrt the Linksys could return all the same mac addresses for br-lan, lan and wan
+ # If so, we do change the wan to [lan-1] if not done already.
+ # In rare situation mac address could end with '00', then we will change wan to end with 'ff'.
+  if [ "$DEVICE" = "linksys,whw03v2" ]; then
     if [ "$(printf "%d" 0x${MACADDR: -2})" -ge 1 ]; then
       MACADDR=$(printf $(echo $MACADDR | cut -c 1-15); printf "%x\n" $((0x${MACADDR: -2}-0x01)))
     else
       MACADDR=$(echo $MACADDR | cut -c 1-15)ff;
     fi
   fi
+ # =end============================================
+ # SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
+
+ # SPECIAL for AVM Fritzbox F4040
+ # =start==========================================
+ # On default OpenWrt the Fritzbox could return all the same mac addresses for br-lan, lan and wan
+ # If so, we do change the wan to [lan+1] if not done already.
+ # In rare situation mac address could end with 'ff', then we will change wan to end with '00'.
+  if [ "$DEVICE" = "avm,fritzbox-4040" ]; then
+    if [ "$(printf "%d" 0x${MACADDR: -2})" -le 254 ]; then
+      MACADDR=$(printf $(echo $MACADDR | cut -c 1-15); printf "%x\n" $((0x${MACADDR: -2}+0x01)))
+    else
+      MACADDR=$(echo $MACADDR | cut -c 1-15)00;
+    fi
+  fi
+ # =end============================================
+ # SPECIAL for AVM Fritzbox F4040
+
 fi
-# =end============================================
-# SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
 
 # Get current OpenWrt version
 # As the wlan mac location for v24.10.0 is different from older versions ??
@@ -316,7 +336,7 @@ fi
 # WHW03 v2 returns: /sys/devices/platform/soc/40000000.pci/pci0000:00/0000:00:00.0/0000:01:00.0/ieee80211/phy0/macaddress
 #                   /sys/devices/platform/soc/a000000.wifi/ieee80211/phy1/macaddress
 #                   /sys/devices/platform/soc/a800000.wifi/ieee80211/phy2/macaddress
-#As this device as 3 wifi radios.
+# As this device as 3 wifi radios.
 #
 # Get all wifi devices. MACARRAY will hold all locations, count hold number of wifis
 # -For do- loop needed & $(cat $a) to get the mac addres(ses)
