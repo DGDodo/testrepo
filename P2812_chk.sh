@@ -1,5 +1,9 @@
 # Program to setup Clean OpenWrt on P2812 F1
-# Copied parts of torset_v1.5 regarding P2812 F1
+# Contains copied parts of torset_v1.5 regarding P2812 F1
+# Wifi functionality available RT3061.eeprom
+# Privoxy available
+# Removed : Tor
+#
 
 # INIT
 
@@ -26,8 +30,8 @@ WIFIPASS2=$WIFIPASS
 # Sequence is now "privoxy firewall dnsmasq tor network"
 SERVICES="privoxy firewall dnsmasq tor network"
 # Set program output parameters
-OUTPUT=/tmp/TMP001.log
-OUTPUT2=/etc/tor/TMP001.log
+OUTPUT=/tmp/OW001.log
+# OUTPUT2=/etc/tor/TMP001.log
 # Set minimum free memory 65MB=65000kB
 # Should we ask to stop Tor if it is running before memcheck?
 FREEMIN=65000
@@ -90,6 +94,13 @@ fi
 # Wifi encryption is depending on OpenWrt version (wpa2 or sae).
 OPENVER=$(cat /etc/openwrt_release | grep RELEASE | cut -f2 -d\')
 
+# Get all wifi devices
+#
+# find /sys | grep phy | grep macaddress
+# Returns all wifi devices even disabled, 1 for P2812, 2 for FB4040
+# if there is no wifi nothing will be done
+# To get wlan mac(s) : find /sys | grep phy | grep macaddress
+#
 # P2812 returns   : /sys/devices/pci0000:00/0000:00:0e.0/ieee80211/phy0/macaddress
 # For the P2812 the extra command in /etc/rc.local should be run before any result!
 # If not done already this script will run the extra command to activate Wifi
@@ -101,6 +112,45 @@ if [ "$DEVICE" = "zyxel,p-2812hnu-f1" ] && [ $(echo $OPENVER | cut -f1 -d.) -ge 
   sleep 1
   echo 1 > /sys/bus/pci/rescan
   sleep 10
+  echo ""
+fi
+# Get all wifi devices. MACARRAY will hold all locations, count hold number of wifis
+# -For do- loop needed & $(cat $a) to get the mac addres(ses)
+# MACWIFI holds first macaddress as it will be changed for P2812 (later)
+#
+MACARRAY=$(find /sys | grep phy | grep macaddress)
+count=0
+for a in $MACARRAY;
+do
+  let count++
+  if [ $count -eq 1 ]; then MACWIFI=$(cat $a); fi
+done
+
+# We found '$count' number of wifi devices
+echo ""
+echo "Wireless settings"
+echo "================="
+echo ""
+# Check if more then 1 wifi devices (count>1)
+if [ $count -gt 1 ]; then echo "Only 1 wifi name and password is asked and used for all wifi radios."; fi
+# Ask for Wifi SSID & WPA2 info off the box, if there is any wifi.
+if [ $count -ge 1 ]; then
+  if [ $count -eq 1 ]; then echo "Here you can ENTER the SSID and it's password / key."; fi
+  echo "Normally the information 'of the box' is used."
+  echo "When just press 'ENTER' the wifi-name will be '"$WIFINAME2"'"
+  echo "with password '"$WIFIPASS2"'"
+  echo ""
+  echo "For wireless encryption 'SAE' the password MUST be at"
+  echo "least 8 characters."
+  echo ""
+  echo "Devices with more than 1 wifi radio will get all the"
+  echo "same name and pass, they can be adjusted afterwards."
+  echo ""
+  read -p "Enter SSID, normally from the device itself: " WIFINAME;
+  if [ -z $WIFINAME ]; then WIFINAME=$WIFINAME2; fi
+  echo ""
+  read -p "Enter it's password / key: " WIFIPASS;
+  if [ -z $WIFIPASS ]; then WIFIPASS=$WIFIPASS2; fi
   echo ""
 fi
 
@@ -133,6 +183,11 @@ fi
 # =end========================================
 # SPECIAL for P-2812HNU-F1 (MACADDR & MACWIFI)
 
+# if OpenWrt version is lower then v19.07.0 only WPA2 (PSK2) is available for WIFICRYPT
+# if password length is long enough (8) WIFICRYPT='SAE-MIXED'
+WIFICRYPT='psk2'
+if [ $(echo $OPENVER | cut -f1 -d.) -ge 19 ] && [ ${#WIFIPASS} -gt 7 ]; then WIFICRYPT='sae-mixed'; fi
+
 # Get package versions:
 # ---------------------
 # Get Privoxy version:
@@ -156,7 +211,67 @@ vIrqb=$(opkg list-installed | grep irqbalance | grep -v luci | cut -f3 -d' ')
 if [ ${#vIrqb} -eq 0 ]; then vIrqb="not installed"; fi
 
 # Check if /etc/tor/torchk.sh exist and add text to vCurl ?
-if [ -f /etc/tor/torchk.sh ] && [ ! -z $vCurl ]; then vTorchk="('torchk.sh' will be activated)"; fi
+# if [ -f /etc/tor/torchk.sh ] && [ ! -z $vCurl ]; then vTorchk="('torchk.sh' will be activated)"; fi
+
+# Start of $OUTPUT
+# Print info, all info seems to be ok to change to TorRouter.
+clear
+echo "" | tee -a "$OUTPUT"
+echo "'"$HOSTNAME"' setup program for device : "$(cat /tmp/sysinfo/model) | tee -a "$OUTPUT"
+echo "======================================================= v"$Pversion" ===" | tee -a "$OUTPUT"
+echo "                                 "$(date -R) | tee -a "$OUTPUT"
+echo "Parameters - Please double check these!" | tee -a "$OUTPUT"
+echo "---------- - All mentioned programs should be installed!" | tee -a "$OUTPUT"
+echo "Router Name        : "$HOSTNAME | tee -a "$OUTPUT"
+echo "OpenWrt version    : "$OPENVER | tee -a "$OUTPUT"
+echo "Tor version        : "$vTor | tee -a "$OUTPUT"
+echo "Curl version       : "$vCurl"  "$vTorchk | tee -a "$OUTPUT"
+echo "Privoxy version    : "$vPriv | tee -a "$OUTPUT"
+if [ ! $vIrqb = "not installed" ]; then echo "Irqbalance version : "$vIrqb | tee -a "$OUTPUT"; fi
+echo "" | tee -a "$OUTPUT"
+echo "IP address LAN     : "$IPADDR | tee -a "$OUTPUT"
+echo "LAN MAC address    : "$MACLAN | tee -a "$OUTPUT"
+echo "WAN MAC address    : "$MACADDR | tee -a "$OUTPUT"
+echo "" | tee -a "$OUTPUT"
+if [ $count -eq 0 ]; then echo "No Wifi capabilities found on this OpenWrt device" | tee -a "$OUTPUT"; fi
+if [ $count -ge 1 ]; then
+  B=0
+  for a in $MACARRAY; do
+    let B++
+    echo "Wifi radio         : "$B | tee -a "$OUTPUT"
+    echo "Wifi name          : "$WIFINAME"  (pass: "$WIFIPASS")" | tee -a "$OUTPUT"
+    if [ $B -eq 1 ]; then echo "Wifi MAC address   : "$MACWIFI | tee -a "$OUTPUT"; fi
+    if [ $B -ne 1 ]; then echo "Wifi MAC address   : "$(cat $a) | tee -a "$OUTPUT"; fi
+    echo "Wifi encryption    : "$WIFICRYPT | tee -a "$OUTPUT"
+  done
+fi
+echo "" | tee -a "$OUTPUT"
+echo " WARNING !" | tee -a "$OUTPUT"
+echo "This program will stop several services, including network." | tee -a "$OUTPUT"
+echo "When run from a SSH shell, there will be no more in- or output." | tee -a "$OUTPUT"
+echo "There is only full in- and output on TTL serial connection!" | tee -a "$OUTPUT"
+echo "Keep this in mind, when answering the continue question." | tee -a "$OUTPUT"
+echo "You will not be able to stop this program, other then running" | tee -a "$OUTPUT"
+echo "this from TTL serial." | tee -a "$OUTPUT"
+echo "" | tee -a "$OUTPUT"
+echo "A logfile ("$OUTPUT2") will be created, just before reboot." | tee -a "$OUTPUT"
+echo "" | tee -a "$OUTPUT"
+echo "================================================================" | tee -a "$OUTPUT"
+#echo "" | tee -a "$OUTPUT"
+
+# Ask to check and continue, clear log if NO
+read -p "Should we continue? (y/N) " userinput
+if [ -z $userinput ]; then userinput=n; fi
+if [ "$userinput" != "y" ]; then
+  echo "Program quit...";
+  echo "";
+  rm -rf $OUTPUT>/dev/null;
+  exit;
+fi
+echo ""
+
+# TEMPORARLY
+exit
 
 
 # PROGRAM

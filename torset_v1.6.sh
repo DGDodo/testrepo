@@ -316,20 +316,6 @@ fi
 # if there is no wifi nothing will be done
 # To get wlan mac(s) : find /sys | grep phy | grep macaddress
 #
-# P2812 returns   : /sys/devices/pci0000:00/0000:00:0e.0/ieee80211/phy0/macaddress
-# For the P2812 the extra command in /etc/rc.local should be run before any result!
-# If not done already this script will run the extra command to activate Wifi
-if [ "$DEVICE" = "zyxel,p-2812hnu-f1" ] && [ $(echo $OPENVER | cut -f1 -d.) -ge 21  ] && [ -f /etc/rc.local ] && [ -z $(cat /etc/rc.local | grep "echo 1 > /sys/bus/pci/rescan") ]; then
-  echo "Check if P2812 see Wifi after special command... (duration over 10 seconds)"
-  echo "When fully run this program, '/etc/rc.local' will be adjusted."
-  echo "If still no wifi found? This P2812's wifi is most probably bricked!"
-  echo ""
-  sleep 1
-  echo 1 > /sys/bus/pci/rescan
-  sleep 10
-  echo ""
-fi
-
 # F4040 returns   : /sys/devices/platform/soc/a000000.wifi/ieee80211/phy0/macaddress
 #                 : /sys/devices/platform/soc/a800000.wifi/ieee80211/phy1/macaddress
 # As it has 2 Wifi radios.
@@ -378,35 +364,6 @@ if [ $count -ge 1 ]; then
   if [ -z $WIFIPASS ]; then WIFIPASS=$WIFIPASS2; fi
   echo ""
 fi
-
-# SPECIAL for P-2812HNU-F1 (MACADDR & MACWIFI)
-# =start======================================
-
-# Create WAN mac address, default WAN mac address is wrong (eth0).
-# LAN MAC address is 'off the box' and working.
-# So we need the MAC address of the box (will be LAN / br-lan).
-# We add '#02' (hex) to the box address for WAN MAC and add '#04' for first WIFI MAC.
-if [ "$DEVICE" = "zyxel,p-2812hnu-f1" ]; then
-  if [ "${MACLAN: -1}" = 0 ]; then
-    MACADDR=$(echo $MACLAN | cut -c 1-16)2;
-    MACWIFI=$(echo $MACLAN | cut -c 1-16)4;
-  fi
-  if [ "${MACLAN: -1}" = 8 ]; then
-    MACADDR=$(echo $MACLAN | cut -c 1-16)a;
-    MACWIFI=$(echo $MACLAN | cut -c 1-16)c;
-  fi
-  if [ ! -f /lib/firmware/RT3062.eeprom ]; then
-    echo "File: '/lib/firmware/RT3062.eeprom' is missing."
-    if [ -f ./RT3062.eeprom ]; then
-      echo " We copy the 'RT3062.eeprom' to it's location."
-      cp ./RT3062.eeprom /lib/firmware/RT3062.eeprom
-    else
-      echo " The file 'RT3062.eeprom' is not found !"
-    fi
-  fi
-fi
-# =end========================================
-# SPECIAL for P-2812HNU-F1 (MACADDR & MACWIFI)
 
 # if OpenWrt version is lower then v19.07.0 only WPA2 (PSK2) is available for WIFICRYPT
 # if password length is long enough (8) WIFICRYPT='SAE-MIXED'
