@@ -22,7 +22,7 @@
 # TODO:
 # - Use same log location for torchk.log as Tor: /var/log/tor/
 #   Needs also 'Custom Commands' change in torset_vx.y.sh
-# - Adjust LED according status (device independent)
+# - Adjust LED according status (device independent) TESTING
 # - Change hourly crontab check to 5 or 10 minutes if failed?
 
 # Program version
@@ -78,11 +78,13 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
 # Log & screen info
       if [ -n "$check" ]; then
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "$torstr" >> $OUTPUT
+        if [ $DEVICE = "avm,fritzbox-4040" ]; then echo "none" > /sys/class/leds/red:info/trigger; fi
       else
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "Did not work properly." >>$OUTPUT
       fi
     else
       printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" " " "Download failed!" >>$OUTPUT
+      if [ $DEVICE = "avm,fritzbox-4040" ]; then echo "default-on" > /sys/class/leds/red:info/trigger; fi
     fi
   fi
 else
