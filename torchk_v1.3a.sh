@@ -2,7 +2,7 @@
 #
 #     dec 2025 v1.3a                  torchk.sh
 #
-# Program uses Tor and curl to grab check.torproject.org
+# Program uses Tor and curl to grab 'check.torproject.org'.
 # It is used with TorRouter to check good working Tor every hour, with crontab.
 # Returns using Tor correctly or not.
 
