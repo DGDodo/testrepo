@@ -6,6 +6,7 @@
 # It is used with TorRouter to check good working Tor every hour, with crontab.
 # Returns using Tor correctly or not.
 
+# v1.2
 # - Added curl check if installed
 # - Added /etc/tor/torchk.log (output of script)
 # - Added check Tor = running
@@ -13,6 +14,8 @@
 # - Added get local lan ip
 # - Added log header and adjusted output layout
 # - Added Program version (also in log output, v1.2)
+# v1.3
+# - Adjust LED according status (device independent, F4040 & WHW03)
 
 # Used:
 # - /etc/tor/torchk.sh                  - Folder holds 'this script' and its output-file
@@ -22,7 +25,6 @@
 # TODO:
 # - Use same log location for torchk.log as Tor: /var/log/tor/
 #   Needs also 'Custom Commands' change in torset_vx.y.sh
-# - Adjust LED according status (device independent) TESTING
 # - Change hourly crontab check to 5 or 10 minutes if failed?
 
 # Program version
