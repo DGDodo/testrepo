@@ -1,6 +1,6 @@
 # Program to setup Clean OpenWrt on P2812 F1
-# Contains copied parts of torset_v1.5 regarding P2812 F1
-# Wifi functionality available RT3061.eeprom
+# Contains copied parts of torset_v1.x regarding P2812 F1
+# Wifi functionality available RT3062.eeprom
 # Privoxy available
 # Removed : Tor
 #
@@ -9,6 +9,8 @@
 
 # Set static Parameters
 # ---------------------
+# Program version
+Pversion=1.1
 # Set hostname TorRouter
 HOSTNAME=OpenWrt
 # Set OpenWrt default ip
@@ -221,7 +223,7 @@ echo "'"$HOSTNAME"' setup program for device : "$(cat /tmp/sysinfo/model) | tee 
 echo "======================================================= v"$Pversion" ===" | tee -a "$OUTPUT"
 echo "                                 "$(date -R) | tee -a "$OUTPUT"
 echo "Parameters - Please double check these!" | tee -a "$OUTPUT"
-echo "---------- - All mentioned programs should be installed!" | tee -a "$OUTPUT"
+echo "----------" | tee -a "$OUTPUT"
 echo "Router Name        : "$HOSTNAME | tee -a "$OUTPUT"
 echo "OpenWrt version    : "$OPENVER | tee -a "$OUTPUT"
 echo "Tor version        : "$vTor | tee -a "$OUTPUT"
@@ -276,6 +278,110 @@ exit
 
 # PROGRAM
 
+# Write current UCI settings to log
+echo "" | tee -a "$OUTPUT"
+echo "Copy current UCI config." | tee -a "$OUTPUT"
+echo "--------------------------------------------------------------------------------" >> $OUTPUT
+uci show >> $OUTPUT
+echo "" >> $OUTPUT
 
+# Set hostname & time settings
+echo "Change Hostname." | tee -a "$OUTPUT"
+echo "--------------------------------------------------------------------------------" >> $OUTPUT
+uci set system.@system[0].hostname=$HOSTNAME
+uci set system.@system[0].zonename='Europe/Amsterdam'
+uci set system.@system[0].timezone='CET-1CEST,M3.5.0,M10.5.0/3'
+uci commit system
+
+# Set WAN
+echo "Correct setup WAN and LAN." | tee -a "$OUTPUT"
+echo "--------------------------------------------------------------------------------" >> $OUTPUT
+uci -q del network.wan=interface
+uci -q del network.wan6=interface
+uci set network.wan=interface
+if [ $DEVICE = "vmware-inc-vmware7-1" ]; then
+  uci set network.wan.device='eth1'
+else
+  uci set network.wan.device='wan'
+  uci set network.wan.macaddr=$MACADDR
+fi
+uci set network.wan.proto='dhcp'
+uci set network.wan.ipv6='0'
+
+# Set LAN
+uci set network.lan=interface
+uci set network.lan.device='br-lan'
+uci set network.lan.proto='static'
+uci set network.lan.ipaddr=$IPADDR
+uci set network.lan.netmask='255.255.255.0'
+uci set network.lan.ip6assign='60'
+uci set network.lan.delegate='0'
+uci set network.lan.ipv6='0'
+uci commit network
+
+
+# Set Wifi device(s)
+#
+if [ $count -gt 0 ]; then
+  echo "Set and activate Wifi(s) according device." | tee -a "$OUTPUT";
+  echo "--------------------------------------------------------------------------------" >> $OUTPUT
+  C=0
+  for a in $MACARRAY;
+  do
+    uci set wireless.radio$C.cell_density='0';
+    uci set wireless.radio$C.channel='auto';
+    uci set wireless.default_radio$C.ssid=$WIFINAME;
+    if [ $C -eq 0 ]; then uci set wireless.default_radio$C.macaddr=$MACWIFI; fi
+    if [ $C -ne 0 ]; then uci set wireless.default_radio$C.macaddr=$(cat $a); fi
+    uci set wireless.default_radio$C.encryption=$WIFICRYPT;
+    uci set wireless.default_radio$C.key=$WIFIPASS;
+    uci set wireless.radio$C.disabled='0';
+    let C++;
+  done
+  uci commit wireless;
+
+# P2812 Only:
+# =start==========
+  if [ "$DEVICE" = "zyxel,p-2812hnu-f1" ]; then
+
+    # Adjust /etc/sysupgrade.conf if not done already. Old one gets name sysupgrade.old.conf
+    if [ -f /etc/sysupgrade.conf ] && [ -z $(cat /etc/sysupgrade.conf | grep "/lib/firmware/RT3062.eeprom") ]; then
+      echo " - Adjusting '/etc/sysupgrade.conf'." | tee -a "$OUTPUT"
+      cp /etc/sysupgrade.conf /etc/sysupgrade.old.conf
+      rm -rf /etc/sysupgrade.conf
+      cat /etc/sysupgrade.old.conf | grep -v "# /etc/example.conf" | grep -v "# /etc/openvpn/" > /etc/sysupgrade.conf
+      cat << EOF >> /etc/sysupgrade.conf
+# OpenWrt P-2812HNU-F1
+# https://openwrt.org/toh/zyxel/p-2812hnu-f1#wifi_on_openwrt
+/lib/firmware/RT3062.eeprom
+
+# /etc/example.conf
+# /etc/openvpn/
+EOF
+    fi
+
+    # Adjust /etc/rc.local if not already. Old one gets name rc.old.local
+    if [ -f /etc/rc.local ] && [ -z $(cat /etc/rc.local | grep "echo 1 > /sys/bus/pci/rescan") ]; then
+      echo " - Adjusting '/etc/rc.local'." | tee -a "$OUTPUT"
+      cp /etc/rc.local /etc/rc.old.local
+      rm -rf /etc/rc.local
+      cat /etc/rc.old.local | grep -v "exit 0" > /etc/rc.local
+      cat << EOF >> /etc/rc.local
+# OpenWrt P-2812HNU-F1
+# https://openwrt.org/toh/zyxel/p-2812hnu-f1#wifi_on_openwrt
+echo 1 > /sys/bus/pci/rescan
+
+# Wifi off / on for activation (rt2860.bin)
+wifi down
+sleep 1
+wifi up
+
+exit 0
+EOF
+    fi
+  fi
+  # P2812 Only:
+  # =end============
+fi
 
 # END
