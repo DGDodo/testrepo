@@ -79,12 +79,20 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
       if [ -n "$check" ]; then
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "$torstr" >> $OUTPUT
         if [ $DEVICE = "avm,fritzbox-4040" ]; then echo "none" > /sys/class/leds/red:info/trigger; fi
+        if [ $DEVICE = "linksys,whw03v2" ]; then 
+          echo "none" > /sys/class/leds/red:indicator/trigger;
+          echo "default-on" > /sys/class/leds/green:indicator/trigger;
+        fi
       else
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "Did not work properly." >>$OUTPUT
       fi
     else
       printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" " " "Download failed!" >>$OUTPUT
       if [ $DEVICE = "avm,fritzbox-4040" ]; then echo "default-on" > /sys/class/leds/red:info/trigger; fi
+      if [ $DEVICE = "linksys,whw03v2" ]; then 
+        echo "default-on" > /sys/class/leds/red:indicator/trigger;
+        echo "none" > /sys/class/leds/green:indicator/trigger;
+      fi
     fi
   fi
 else
