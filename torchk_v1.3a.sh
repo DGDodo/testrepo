@@ -3,7 +3,7 @@
 # ========================================
 #          SCRIPT TORROUTER CHECK
 # ========================================
-# dec 2025 v1.3                  torchk.sh
+# dec 2025 v1.3a                 torchk.sh
 #
 # For use with http://TorRouter.nl
 #
@@ -30,6 +30,7 @@
 # - /tmp/torchk.html                    - Holds 'collected data'
 
 # TODO:
+# - Use of function(s) for LED changes
 # - Change hourly crontab check to 5 or 10 minutes if failed?
 
 # Program version
@@ -58,6 +59,23 @@ DEVICE=$(ubus call system board | grep board_name | cut -f4 -d\")
 # Get lan ip
 lanip=$(uci show | grep lan.ipaddr | cut -d\' -f2)
 
+# Function LED (on or off)
+AdjustLEDs() {
+if %1="on" then 
+  LEDon="none";
+  LEDoff="default-on";
+else 
+  LEDon="default-on";
+  LEDoff="none";
+fi
+if [ $DEVICE = "avm,fritzbox-4040" ]; then echo $LEDoff > /sys/class/leds/red:info/trigger; fi
+  if [ $DEVICE = "linksys,whw03v2" ]; then
+    echo $LEDoff > /sys/class/leds/red:indicator/trigger;
+    echo $LEDon > /sys/class/leds/green:indicator/trigger;
+  fi
+}
+
+
 # Screen header
 echo ""
 echo "========================================"
@@ -85,20 +103,22 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
 # Log & screen info
       if [ -n "$check" ]; then
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "$torstr" >> $OUTPUT
-        if [ $DEVICE = "avm,fritzbox-4040" ]; then echo "none" > /sys/class/leds/red:info/trigger; fi
-        if [ $DEVICE = "linksys,whw03v2" ]; then
-          echo "none" > /sys/class/leds/red:indicator/trigger;
-          echo "default-on" > /sys/class/leds/green:indicator/trigger;
+        AdjustLEDs off
+#        if [ $DEVICE = "avm,fritzbox-4040" ]; then echo "none" > /sys/class/leds/red:info/trigger; fi
+#        if [ $DEVICE = "linksys,whw03v2" ]; then
+#          echo "none" > /sys/class/leds/red:indicator/trigger;
+#          echo "default-on" > /sys/class/leds/green:indicator/trigger;
         fi
       else
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "Did not work properly." >>$OUTPUT
       fi
     else
       printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" " " "Download failed!" >>$OUTPUT
-      if [ $DEVICE = "avm,fritzbox-4040" ]; then echo "default-on" > /sys/class/leds/red:info/trigger; fi
-      if [ $DEVICE = "linksys,whw03v2" ]; then
-        echo "default-on" > /sys/class/leds/red:indicator/trigger;
-        echo "none" > /sys/class/leds/green:indicator/trigger;
+      AdjustLEDs on
+#      if [ $DEVICE = "avm,fritzbox-4040" ]; then echo "default-on" > /sys/class/leds/red:info/trigger; fi
+#      if [ $DEVICE = "linksys,whw03v2" ]; then
+#        echo "default-on" > /sys/class/leds/red:indicator/trigger;
+#        echo "none" > /sys/class/leds/green:indicator/trigger;
       fi
     fi
   fi
