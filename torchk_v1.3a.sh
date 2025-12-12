@@ -23,6 +23,9 @@
 # - Adjust LED according status (device independent, F4040 & WHW03)
 # - Use same log location for torchk.log as Tor: /var/log/tor/
 #   Needs also 'Custom Commands' change in torset_vx.y.sh (Done)
+# v1.4
+# - Use of function(s) for LED changes in the program
+#
 
 # Used:
 # - /etc/tor/torchk.sh                  - Folder holds 'this script' and its output-file
@@ -30,7 +33,6 @@
 # - /tmp/torchk.html                    - Holds 'collected data'
 
 # TODO:
-# - Use of function(s) for LED changes
 # - Change hourly crontab check to 5 or 10 minutes if failed?
 
 # Program version
@@ -59,7 +61,7 @@ DEVICE=$(ubus call system board | grep board_name | cut -f4 -d\")
 # Get lan ip
 lanip=$(uci show | grep lan.ipaddr | cut -d\' -f2)
 
-# Function LED (on=error or off=OK)
+# Function LEDs (on=error or off=OK)
 AdjustLEDs() {
 if [ "$1" = "on" ]; then 
   LEDon="none";
