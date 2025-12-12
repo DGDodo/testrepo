@@ -1,10 +1,15 @@
 #!/bin/sh
 #
-#     dec 2025 v1.3a                  torchk.sh
+# ========================================
+#          SCRIPT TORROUTER CHECK
+# ========================================
+# dec 2025 v1.3                  torchk.sh
+#
+# For use with http://TorRouter.nl
 #
 # Program uses Tor and curl to grab 'check.torproject.org'.
 # It is used with TorRouter to check good working Tor every hour, with crontab.
-# Returns using Tor correctly or not.
+# Returns using Tor correctly or not and adjust LED configuration accordingly.
 
 # v1.2
 # - Added curl check if installed
@@ -16,22 +21,22 @@
 # - Added Program version (also in log output, v1.2)
 # v1.3
 # - Adjust LED according status (device independent, F4040 & WHW03)
+# - Use same log location for torchk.log as Tor: /var/log/tor/
+#   Needs also 'Custom Commands' change in torset_vx.y.sh (Done)
 
 # Used:
 # - /etc/tor/torchk.sh                  - Folder holds 'this script' and its output-file
-# - /etc/tor/torchk.log                 - The actual 'log file'
+# - /var/log/tor/torchk.log             - The actual 'log file'
 # - /tmp/torchk.html                    - Holds 'collected data'
 
 # TODO:
-# - Use same log location for torchk.log as Tor: /var/log/tor/
-#   Needs also 'Custom Commands' change in torset_vx.y.sh
 # - Change hourly crontab check to 5 or 10 minutes if failed?
 
 # Program version
 Pversion=1.3
 
 # Set log parameter
-OUTPUT=/etc/tor/torchk.log
+OUTPUT=/var/log/tor/torchk.log
 
 # Set output file parameter
 filestr1=/tmp/torchk.html

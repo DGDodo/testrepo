@@ -7,8 +7,8 @@
 #
 # For use with http://TorRouter.nl
 #
-# This script is for OpenWrt devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64
-# All the ZyXEL P2812 F1 items will be removed as TorRouter setup needs too much memory.
+# This script is for OpenWrt devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64.
+# It will rename the device and setup all needed for Tor and Privoxy to work properly.
 #
 # Added:         - Program version for output etc.
 #                - Program start / input header 
@@ -21,15 +21,17 @@
 #                - irqbalance version also shown for WHW03 v2
 #                - Adjusted torchk command (v1.3)
 #                - Adjust LED's according torchk.sh (v1.3, device independed)
+#                - Remove all P2812 items (add to own P2812 program)
 #
 # New TorRouter builds have the following files/scripts already in them:
 #  - Latest version of Tor (0.4.8.21)
 #  - torset_v1.x.sh	this script (creates also /tmp/TR001.log and -finally- /etc/tor/TR001.log)
 #  - torchk.sh (v1.3) Tor check script runs every hour to test Tor (and creates torchk.log)
-#  - torrc, custom and nftables.d/tor.sh for use with Tor
-#  - torsocks.conf and torrc_generated will begenerated bij Tor itself (if torsocks installed).
+#  - torrc for use with Tor
+#  - custom and nftables.d/tor.sh (will be created here if not already in build)
+#  - torsocks.conf and torrc_generated will be generated bij Tor itself (if torsocks installed).
 #
-# To do: - Remove all P2812 items (add to own P2812 program)
+# To do: 
 
 # apr 2025 v1.4a
 #
@@ -479,14 +481,6 @@ echo ""
 
 # Install additional (missing?) packages here ?
 # Only if WAN is active / working ? Clean OpenWrt on WHW03 v2 does not have working WAN!
-#
-# First adjust / check all needed files here before continue?
-# Or at the end ...
-
-# Example: check if irqbalance is enabled & does its config file exist?
-# if [ -f /etc/config/irqbalance ]; then 
-#   if [ -n "$(cat /etc/config/irqbalance | grep enabled | grep 1)" ]; then echo "enabled"; else echo "disabled"; fi
-# fi
 
 # Stop services
 echo "Stop services." | tee -a "$OUTPUT"
@@ -708,10 +702,6 @@ uci set firewall.tcp_int.target="DNAT"
 echo "Disable LAN to WAN forwarding." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 uci -q delete firewall.@forwarding[0]
-# uci commit firewall
-
-# --- below to be checked !!! ---------   For now we leave them, check afterwards
-#                                         with also the torscript of OpenWrt.
 
 # Intercept IPv6 DNS traffic
 echo "Intercept IPv6 DNS traffic." | tee -a "$OUTPUT"
@@ -721,11 +711,6 @@ uci del firewall.@defaults[0].syn_flood
 uci set firewall.@defaults[0].synflood_protect='1'
 uci set firewall.@defaults[0].drop_invalid='1'
 uci commit firewall
-
-# Enable DNS over Tor
-# echo "Enable DNS over Tor." | tee -a "$OUTPUT"
-# echo "--------------------------------------------------------------------------------" >> $OUTPUT
-# uci set dhcp.@dnsmasq[0].boguspriv="0"
 
 # Disable DNS forwarding for dhcp LAN
 echo "Disable DNS forwarding for LAN dhcp." | tee -a "$OUTPUT"
@@ -738,8 +723,6 @@ echo "--------------------------------------------------------------------------
 uci del dhcp.lan.dhcpv6='server'
 uci set dhcp.lan.limit='50'
 uci commit dhcp
-#
-# ---- to be tested   all above here --------
 
 # Adjust privoxy settings
 echo "Change privoxy settings." | tee -a "$OUTPUT"
@@ -849,49 +832,6 @@ if [ $count -gt 0 ]; then
     let C++;
   done
   uci commit wireless;
-
-# P2812 Only:
-# =start==========
-  if [ "$DEVICE" = "zyxel,p-2812hnu-f1" ]; then
-
-    # Adjust /etc/sysupgrade.conf if not done already. Old one gets name sysupgrade.old.conf
-    if [ -f /etc/sysupgrade.conf ] && [ -z $(cat /etc/sysupgrade.conf | grep "/lib/firmware/RT3062.eeprom") ]; then
-      echo " - Adjusting '/etc/sysupgrade.conf'." | tee -a "$OUTPUT"
-      cp /etc/sysupgrade.conf /etc/sysupgrade.old.conf
-      rm -rf /etc/sysupgrade.conf
-      cat /etc/sysupgrade.old.conf | grep -v "# /etc/example.conf" | grep -v "# /etc/openvpn/" > /etc/sysupgrade.conf
-      cat << EOF >> /etc/sysupgrade.conf
-# OpenWrt P-2812HNU-F1
-# https://openwrt.org/toh/zyxel/p-2812hnu-f1#wifi_on_openwrt
-/lib/firmware/RT3062.eeprom
-
-# /etc/example.conf
-# /etc/openvpn/
-EOF
-    fi
-
-    # Adjust /etc/rc.local if not already. Old one gets name rc.old.local
-    if [ -f /etc/rc.local ] && [ -z $(cat /etc/rc.local | grep "echo 1 > /sys/bus/pci/rescan") ]; then
-      echo " - Adjusting '/etc/rc.local'." | tee -a "$OUTPUT"
-      cp /etc/rc.local /etc/rc.old.local
-      rm -rf /etc/rc.local
-      cat /etc/rc.old.local | grep -v "exit 0" > /etc/rc.local
-      cat << EOF >> /etc/rc.local
-# OpenWrt P-2812HNU-F1
-# https://openwrt.org/toh/zyxel/p-2812hnu-f1#wifi_on_openwrt
-echo 1 > /sys/bus/pci/rescan
-
-# Wifi off / on for activation (rt2860.bin)
-wifi down
-sleep 1
-wifi up
-
-exit 0
-EOF
-    fi
-  fi
-  # P2812 Only:
-  # =end============
 fi
 
 # Adjust uHTTPd https setting:
