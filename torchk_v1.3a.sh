@@ -23,7 +23,7 @@
 # - Adjust LED according status (device independent, F4040 & WHW03)
 # - Use same log location for torchk.log as Tor: /var/log/tor/
 #   Needs also 'Custom Commands' change in torset_vx.y.sh (Done)
-# v1.4
+# v1.4 (future)
 # - Use of function(s) for LED changes in the program
 #
 
@@ -115,7 +115,10 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
   fi
 else
   if [ "$DEVICE" = "" ]; then echo "This is not an OpenWrt device."; fi
-  if [ ! "$(service tor status)" = "running" ]; then echo "Service 'tor' is not running."; fi
+  if [ ! "$(service tor status)" = "running" ]; then 
+    echo "Service 'tor' is not running.";
+    AdjustLEDs "on"
+  fi
   if [ $progid -eq 0 ]; then echo "Package 'curl' is not installed."; fi
 fi
 
