@@ -11,7 +11,7 @@
 # It will rename the device and setup all needed for Tor and Privoxy to work properly.
 #
 # Added:         - Program version for output etc.
-#                - Program start / input header 
+#                - Program start / input header
 # Added & Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
 #                                    - Check if the tool works with these 3 Wifi radios
 #                - ZyXEL P2812 will stop after overview
@@ -31,7 +31,7 @@
 #  - custom and nftables.d/tor.sh (will be created here if not already in build)
 #  - torsocks.conf and torrc_generated will be generated bij Tor itself (if torsocks installed).
 #
-# To do: 
+# To do:
 
 # apr 2025 v1.4a
 #
@@ -600,7 +600,7 @@ echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
 
 exit 0
 EOF
-    else 
+    else
       echo "File: 'rc.local' already adjusted." | tee -a "$OUTPUT"
       echo "" | tee -a "$OUTPUT"
     fi
@@ -628,7 +628,7 @@ if ! grep -q "/etc/tor" /etc/sysupgrade.conf; then
 # /etc/example.conf
 # /etc/openvpn/
 EOF
-else 
+else
   echo "File: '/etc/sysupgrade.conf' already adjusted." | tee -a "$OUTPUT"
   echo "" | tee -a "$OUTPUT"
 fi
