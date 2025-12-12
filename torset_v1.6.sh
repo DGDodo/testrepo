@@ -14,21 +14,22 @@
 #                - Program start / input header 
 # Added & Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
 #                                    - Check if the tool works with these 3 Wifi radios
+#                - ZyXEL P2812 will stop after overview
 # Fixed:         - Make sure irqbalance is started
 #                - Fritzbox F4040 WAN mac = LAN mac + 1
 #                - Check if torchk.sh and torsetup_v1.x.sh are executable within building version.
 #                - irqbalance version also shown for WHW03 v2
+#                - Adjusted torchk command (v1.3)
+#                - Adjust LED's according torchk.sh (v1.3, device independed)
 #
 # New TorRouter builds have the following files/scripts already in them:
-#  - torset_v1.x.sh	This script (creates also /tmp/TR001.log and -finally- /etc/tor/TR001.log)
-#  - torchk.sh		Tor check script runs every hour to test Tor (and creates torchk.log)
-#  - torrc, custom and nftables.d/tor.sh for use with Tor
-#  - torsocks.conf and torrc_generated will begenerated bij Tor itself.
 #  - Latest version of Tor (0.4.8.21)
+#  - torset_v1.x.sh	this script (creates also /tmp/TR001.log and -finally- /etc/tor/TR001.log)
+#  - torchk.sh (v1.3) Tor check script runs every hour to test Tor (and creates torchk.log)
+#  - torrc, custom and nftables.d/tor.sh for use with Tor
+#  - torsocks.conf and torrc_generated will begenerated bij Tor itself (if torsocks installed).
 #
 # To do: - Remove all P2812 items (add to own P2812 program)
-#        - Adjust LED's according torchk.sh (device independed)
-#        - Check irqbalance differences F4040 vs WHW03
 
 # apr 2025 v1.4a
 #
@@ -436,6 +437,14 @@ if [ $count -ge 1 ]; then
     echo "Wifi encryption    : "$WIFICRYPT | tee -a "$OUTPUT"
   done
 fi
+if [ $DEVICE = "zyxel,p-2812hnu-f1" ]; then
+  echo "" | tee -a "$OUTPUT"
+  echo "This device: '"$DEVICE"', does not support "$HOSTNAME"." | tee -a "$OUTPUT"
+  echo "Program will stop here and nothing is changed." | tee -a "$OUTPUT"
+  echo "" | tee -a "$OUTPUT"
+  rm -rf $OUTPUT>/dev/null;
+  exit;
+fi
 echo "" | tee -a "$OUTPUT"
 echo " WARNING !" | tee -a "$OUTPUT"
 echo "This program will stop several services, including network." | tee -a "$OUTPUT"
@@ -807,7 +816,7 @@ if [ ! "$vLAC" = "not installed" ]; then
     uci set luci.@command[-1].param='0'
     uci set luci.@command[-1].public='0'
     uci set luci.@command[-1].name='TorRouter Check Log'
-    uci set luci.@command[-1].command='cat /etc/tor/torchk.log'
+    uci set luci.@command[-1].command='cat /var/log/tor/torchk.log'
     uci del luci.@command[-1].param
     uci del luci.@command[-1].public
     uci add luci command
