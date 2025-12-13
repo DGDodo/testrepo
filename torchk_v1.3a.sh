@@ -19,10 +19,11 @@
 # - Added get local lan ip
 # - Added log header and adjusted output layout
 # - Added Program version (also in log output, v1.2)
-# v1.3 (Final release TorrRouter 24.10.4 with torset_v1.6.sh)
+# v1.3 (Final release TorRouter 24.10.4 with torset_v1.6.sh)
 # - Adjust LED according status (device independent, F4040 & WHW03)
 # - Use same log location for torchk.log as Tor: /var/log/tor/
-#   Needs also 'Custom Commands' change in torset_vx.y.sh (Done)
+#   Every reboot a new torchk log.
+#   Needs also 'Custom Commands' change in torset_v1.6.sh (Done)
 
 # v1.4 (future)
 # - Use of function(s) for LED changes in the program
