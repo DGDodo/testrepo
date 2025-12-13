@@ -33,7 +33,7 @@
 #  - custom and nftables.d/tor.sh (will be created here if not already in build)
 #  - torsocks.conf and torrc_generated will be generated bij Tor itself (if torsocks installed).
 #
-# To do:
+# To do: (v1.7)
 
 # apr 2025 v1.4a
 #
