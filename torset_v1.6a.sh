@@ -31,7 +31,7 @@
 #  - custom and nftables.d/tor.sh (will be created here if not already in build)
 #  - torsocks.conf and torrc_generated will be generated bij Tor itself (if torsocks installed).
 #
-# To do:
+# To do: - Changing deletion of wan6 (testing)
 
 # apr 2025 v1.4a
 #
@@ -523,7 +523,6 @@ uci commit system
 echo "Correct setup WAN and LAN." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 uci -q del network.wan=interface
-uci -q del network.wan6=interface
 uci set network.wan=interface
 if [ $DEVICE = "vmware-inc-vmware7-1" ]; then
   uci set network.wan.device='eth1'
@@ -535,6 +534,11 @@ uci set network.wan.proto='dhcp'
 uci set network.wan.ipv6='0'
 uci set network.wan.hostname='*'
 uci set network.wan.peerdns='0'
+# Remove wan6
+uci del firewall.@zone[1].network
+uci add_list firewall.@zone[1].network='wan'
+uci -q del network.wan6=interface
+uci set network.globals.packet_steering='1'
 
 # Set LAN
 uci set network.lan=interface
@@ -744,7 +748,18 @@ echo "Check & adjust crontab." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 if [ ! "$vCurl" = "not installed" ];then
   if [ -f /etc/tor/torchk.sh ] && [ ! -f /etc/crontabs/root ]; then
-    echo "0 * * * * /etc/tor/torchk.sh" > /etc/crontabs/root
+    cat << "EOF" > # Info: https://openwrt.org/docs/guide-user/base-system/cron
+# TorRouter.nl version for check Tor.
+# .----------- Minute (0 - 59)
+# | .--------- Hour (0 - 23)
+# | | .------- Day (1 - 31)
+# | | | .----- Month (1 - 12)
+# | | | | .--- Day of week (0 - 6) (Sunday =0)
+# | | | | |
+# v v v v v
+# * * * * * command to execute
+  0 * * * * /etc/tor/torchk.sh
+EOF
   else
     if ! grep -q "/etc/tor/torchk.sh" /etc/tor/torchk.sh; then
       echo "0 * * * * /etc/tor/torchk.sh" >> /etc/crontabs/root
