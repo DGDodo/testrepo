@@ -7,6 +7,7 @@
 #
 # For use with http://TorRouter.nl
 #
+# This script is for TorRouter devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64.
 # Program uses Tor and curl to grab 'check.torproject.org'.
 # It is used with TorRouter to check good working Tor every hour, with crontab.
 # Returns using Tor correctly or not and adjust LED configuration accordingly.
