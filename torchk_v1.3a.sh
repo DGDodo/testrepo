@@ -107,6 +107,7 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
         AdjustLEDs "off"
       else
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "Did not work properly." >>$OUTPUT
+        AdjustLEDs "on"
       fi
     else
       printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" " " "Download failed!" >>$OUTPUT
