@@ -116,11 +116,11 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
   fi
 else
   if [ "$DEVICE" = "" ]; then echo "This is not an OpenWrt device."; fi
+  if [ $progid -eq 0 ]; then echo "Package 'curl' is not installed."; fi
   if [ ! "$(service tor status)" = "running" ]; then 
     echo "Service 'tor' is not running.";
     AdjustLEDs "on"
   fi
-  if [ $progid -eq 0 ]; then echo "Package 'curl' is not installed."; fi
 fi
 
 # End
