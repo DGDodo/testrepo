@@ -3,7 +3,7 @@
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
-# dec 2025 v1.6a
+# dec 2025 v1.6a                 torset.sh
 #
 # For use with http://TorRouter.nl
 #
