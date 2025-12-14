@@ -28,11 +28,12 @@
 
 # v1.4 (future)
 # - Use of function(s) for LED changes in the program 
-#   good working Tor =    F4040->info LED off           / WHW03->steady green LED
-#   defect working Tor =  F4040->steady red info LED    / WHW03->steady red LED
-#   missing working Tor = F4040->blinking red info LED  / WHW03->blinking red LED
+#   good working Tor =    F4040 -> info LED off           / WHW03->steady green LED
+#   defect working Tor =  F4040 -> steady red info LED    / WHW03->steady red LED
+#   missing working Tor = F4040 -> blinking red info LED  / WHW03->blinking red LED
 # - Added red blinking (info) LED for Tor not running
-# - What should be the starting LED config of both devices? WHW03 is blue but trigger status says "none"
+# - What should be the starting LED config of both devices?
+#   WHW03 is blue but trigger status says "none"
 #   F4040 is as required (Info LED off)
 
 # Used:
@@ -44,7 +45,7 @@
 # - Change hourly crontab check to 5 or 10 minutes if failed?
 
 # Parameters
-
+# ==========
 # Program version
 Pversion=1.3
 # Set log parameter
@@ -65,7 +66,7 @@ DEVICE=$(ubus call system board | grep board_name | cut -f4 -d\")
 lanip=$(uci show | grep lan.ipaddr | cut -d\' -f2)
 
 # Functions
-
+# =========
 # Function LEDs (on=error or off=OK)
 AdjustLEDs() {
 if [ "$1" = "on" ]; then 
@@ -99,7 +100,7 @@ fi
 }
 
 # Program
-
+# =======
 # Screen header
 echo ""
 echo "========================================"
@@ -110,7 +111,9 @@ echo "Start:      "$(date)
 # Log header
 if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "running" ]; then
   if [ ! -f $OUTPUT  ]; then
-    printf "%-6s| %-29s| %-16s| %s\n" progID Date IP Info > $OUTPUT
+    echo "Tor check log for TorRouter.nl" > $OUTPUT
+    echo "" >> $OUTPUT
+    printf "%-6s| %-29s| %-16s| %s\n" progID Date IP Info >> $OUTPUT
     echo "------+------------------------------+-----------------+------------------------------- v"$Pversion" -" >> $OUTPUT
   fi
 # Screen info
@@ -147,5 +150,6 @@ else
 fi
 
 # End
+# ===
 echo "Stop:       "$(date)
 echo ""
