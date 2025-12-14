@@ -12,7 +12,6 @@
 #
 # Added:         - Program version for output etc.
 #                - Program start / input header
-#                - Adjusted crontab info for torchk.sh
 # Added & Fixed: - Linksys WHW03 v2: - WAN mac = LAN mac -1
 #                                    - Check if the tool works with these 3 Wifi radios
 #                - ZyXEL P2812 will stop after overview
@@ -35,6 +34,8 @@
 # To do: (v1.7) - Get ride of message: daemon.warn odhcpd[1246]: No default route present, setting ra_lifetime to 0!
 #                 Disable dhcpv6 for lan: uci set network.lan.ipv6='0' (testing)
 # Fixed:        - Changing deletion of wan6 (testing)
+# Changed:      - Adjusted crontab info for torchk.sh
+#
 
 # apr 2025 v1.4a
 #
@@ -525,6 +526,7 @@ uci commit system
 # Set WAN
 echo "Correct setup WAN and LAN." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
+uci del firewall.@zone[1].network
 uci -q del network.wan=interface
 uci set network.wan=interface
 if [ $DEVICE = "vmware-inc-vmware7-1" ]; then
@@ -537,9 +539,8 @@ uci set network.wan.proto='dhcp'
 uci set network.wan.ipv6='0'
 uci set network.wan.hostname='*'
 uci set network.wan.peerdns='0'
-# Remove wan6
-uci del firewall.@zone[1].network
 uci add_list firewall.@zone[1].network='wan'
+# Remove wan6
 uci -q del network.wan6=interface
 uci set network.globals.packet_steering='1'
 
@@ -752,7 +753,7 @@ echo "--------------------------------------------------------------------------
 if [ ! "$vCurl" = "not installed" ];then
   if [ -f /etc/tor/torchk.sh ] && [ ! -f /etc/crontabs/root ]; then
     cat << "EOF" > # Info: https://openwrt.org/docs/guide-user/base-system/cron
-# TorRouter.nl version for check Tor.
+# TorRouter.nl version for Tor check.
 # .----------- Minute (0 - 59)
 # | .--------- Hour (0 - 23)
 # | | .------- Day (1 - 31)
@@ -765,7 +766,7 @@ if [ ! "$vCurl" = "not installed" ];then
 EOF
   else
     if ! grep -q "/etc/tor/torchk.sh" /etc/tor/torchk.sh; then
-      echo "0 * * * * /etc/tor/torchk.sh" >> /etc/crontabs/root
+      echo "  0 * * * * /etc/tor/torchk.sh" >> /etc/crontabs/root
     fi
   fi
 fi
