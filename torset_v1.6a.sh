@@ -555,14 +555,13 @@ uci set network.lan.delegate='0'
 uci set network.lan.ipv6='0'
 uci commit network
 
-# Adjust tor settings (1. Tor client)
-# Creates /etc/tor/custom, if not already exist.
-#
-echo "Add tor settings." | tee -a "$OUTPUT"
+# Create (if not already exist) or adjust needed files.
+echo "Check and adjust or create needed files." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
+
+# /etc/tor/custom
 if [ ! -f /etc/tor/custom ]; then
-  echo "Creating file: /etc/tor/custom" | tee -a "$OUTPUT"
-  echo "" | tee -a "$OUTPUT"
+  echo " - Creating file: /etc/tor/custom" | tee -a "$OUTPUT"
   cat << EOF > /etc/tor/custom
 AutomapHostsOnResolve 1
 AutomapHostsSuffixes .
@@ -574,12 +573,8 @@ TransPort 0.0.0.0:9040
 TransPort [::]:9040
 EOF
 else
-  echo "File: '/etc/tor/custom' already exist." | tee -a "$OUTPUT"
-  echo "" | tee -a "$OUTPUT"
+  echo " - File: '/etc/tor/custom' already exist." | tee -a "$OUTPUT"
 fi
-uci del_list tor.conf.tail_include="/etc/tor/custom"
-uci add_list tor.conf.tail_include="/etc/tor/custom"
-uci commit tor
 
 # F4040 only start
 # ==========================================================================
@@ -587,12 +582,10 @@ uci commit tor
 if [ "$DEVICE" = "avm,fritzbox-4040" ]; then
   if [ "$vIrqb" = "not installed" ]; then
     echo " - Package 'irqbalance' is not installed!" | tee -a "$OUTPUT"
-    echo "" | tee -a "$OUTPUT"
   else
 #   if [ -f /etc/rc.local ] && [ -z $(cat /etc/rc.local | grep "echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor") ]; then
     if [ -f /etc/rc.local ] && ! grep -q "echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor" /etc/rc.local; then
       echo " - Adjusting '/etc/rc.local'." | tee -a "$OUTPUT"
-      echo "" | tee -a "$OUTPUT"
       cp /etc/rc.local /etc/rc.old.local
       rm -rf /etc/rc.local
       cat /etc/rc.old.local | grep -v "exit 0" > /etc/rc.local
@@ -609,8 +602,7 @@ echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
 exit 0
 EOF
     else
-      echo "File: 'rc.local' already adjusted." | tee -a "$OUTPUT"
-      echo "" | tee -a "$OUTPUT"
+      echo " - File: 'rc.local' already adjusted." | tee -a "$OUTPUT"
     fi
   fi
 fi
@@ -620,7 +612,6 @@ fi
 # Adjust /etc/sysupgrade.conf if not done already.
 if ! grep -q "/etc/tor" /etc/sysupgrade.conf; then
   echo " - Adjusting '/etc/sysupgrade.conf'." | tee -a "$OUTPUT"
-  echo "" | tee -a "$OUTPUT"
   cp /etc/sysupgrade.conf /etc/sysupgrade.old.conf
   rm -rf /etc/sysupgrade.conf
   cat /etc/sysupgrade.old.conf | grep -v "# /etc/example.conf" | grep -v "# /etc/openvpn/" > /etc/sysupgrade.conf
@@ -637,9 +628,36 @@ if ! grep -q "/etc/tor" /etc/sysupgrade.conf; then
 # /etc/openvpn/
 EOF
 else
-  echo "File: '/etc/sysupgrade.conf' already adjusted." | tee -a "$OUTPUT"
-  echo "" | tee -a "$OUTPUT"
+  echo " - File: '/etc/sysupgrade.conf' already adjusted." | tee -a "$OUTPUT"
 fi
+
+# /etc/nftables.d/tor.sh will be created if not already exist
+echo "Adjust firewall settings." | tee -a "$OUTPUT"
+echo "--------------------------------------------------------------------------------" >> $OUTPUT
+if [ ! -f /etc/nftables.d/tor.sh ]; then
+  echo " - Create & make executable file: '/etc/nftables.d/tor.sh'" | tee -a "$OUTPUT"
+  cat << "EOF" > /etc/nftables.d/tor.sh
+TOR_CHAIN="dstnat_$(uci -q get firewall.tcp_int.src)"
+TOR_RULE="$(nft -a list chain inet fw4 ${TOR_CHAIN} \
+| sed -n -e "/Intercept-TCP/p")"
+nft replace rule inet fw4 ${TOR_CHAIN} \
+handle ${TOR_RULE##* } \
+fib daddr type != { local, broadcast } ${TOR_RULE}
+EOF
+else
+  echo " - File: '/etc/nftables.d/tor.sh' already exist." | tee -a "$OUTPUT"
+fi
+# Check & make /etc/tor/nftables.d/tor/sh executable:
+if [ ! -x /etc/nftables.d/tor.sh ]; then
+  chmod +x /etc/nftables.d/tor.sh
+fi
+
+# Adjust tor settings (1. Tor client)
+echo "Add tor settings." | tee -a "$OUTPUT"
+echo "--------------------------------------------------------------------------------" >> $OUTPUT
+uci del_list tor.conf.tail_include="/etc/tor/custom"
+uci add_list tor.conf.tail_include="/etc/tor/custom"
+uci commit tor
 
 #  Adjust tor settings (2. DNS over Tor)
 #
@@ -670,29 +688,7 @@ uci add_list dhcp.@dnsmasq[0].server="::1#9053"
 #  Adjust tor settings (3. Firewall)
 #
 # Adjust firewall settings / Intercept TCP traffic
-# /etc/nftables.d/tor.sh will be created if not already exist
 #
-echo "Adjust firewall settings." | tee -a "$OUTPUT"
-echo "--------------------------------------------------------------------------------" >> $OUTPUT
-if [ ! -f /etc/nftables.d/tor.sh ]; then
-  echo "Create & make executable file: '/etc/nftables.d/tor.sh'" | tee -a "$OUTPUT"
-  echo "" | tee -a "$OUTPUT"
-  cat << "EOF" > /etc/nftables.d/tor.sh
-TOR_CHAIN="dstnat_$(uci -q get firewall.tcp_int.src)"
-TOR_RULE="$(nft -a list chain inet fw4 ${TOR_CHAIN} \
-| sed -n -e "/Intercept-TCP/p")"
-nft replace rule inet fw4 ${TOR_CHAIN} \
-handle ${TOR_RULE##* } \
-fib daddr type != { local, broadcast } ${TOR_RULE}
-EOF
-else
-  echo "File: '/etc/nftables.d/tor.sh' already exist." | tee -a "$OUTPUT"
-  echo "" | tee -a "$OUTPUT"
-fi
-# Check & make /etc/tor/nftables.d/tor/sh executable:
-if [ ! -x /etc/nftables.d/tor.sh ]; then
-  chmod +x /etc/nftables.d/tor.sh
-fi
 uci -q delete firewall.tor_nft
 uci set firewall.tor_nft="include"
 uci set firewall.tor_nft.path="/etc/nftables.d/tor.sh"
