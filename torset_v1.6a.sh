@@ -749,7 +749,7 @@ echo "--------------------------------------------------------------------------
 if [ ! "$vCurl" = "not installed" ];then
   if [ -f /etc/tor/torchk.sh ] && [ ! -f /etc/crontabs/root ]; then
     cat << "EOF" > # Info: https://openwrt.org/docs/guide-user/base-system/cron
-# TorRouter.nl version for Tor check.
+# TorRouter.nl version for Tor check. (scripted)
 # .----------- Minute (0 - 59)
 # | .--------- Hour (0 - 23)
 # | | .------- Day (1 - 31)
