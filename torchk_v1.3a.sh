@@ -27,8 +27,11 @@
 #   Needs also 'Custom Commands' change in torset_v1.6.sh (Done)
 
 # v1.4 (future)
-# - Use of function(s) for LED changes in the program
-# - Add red blinking (info) LED for Tor not running
+# - Use of function(s) for LED changes in the program 
+#   good working Tor =    F4040->info LED off           / WHW03->steady green LED
+#   defect working Tor =  F4040->steady red info LED    / WHW03->steady red LED
+#   missing working Tor = F4040->blinking red info LED  / WHW03->blinking red LED
+# - Added red blinking (info) LED for Tor not running
 
 # Used:
 # - /etc/tor/torchk.sh                  - Folder holds 'this script' and its output-file
