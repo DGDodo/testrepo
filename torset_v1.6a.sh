@@ -34,6 +34,7 @@
 # To do: (v1.7) - Get ride of message: daemon.warn odhcpd[1246]: No default route present, setting ra_lifetime to 0!
 #                 Disable dhcpv6 for lan: uci set network.lan.ipv6='0' (testing)
 # Fixed:        - Changing deletion of wan6 (testing)
+#               - Get MACADDR for vmware adjusted
 # Changed:      - Adjusted crontab info for torchk.sh
 #
 
