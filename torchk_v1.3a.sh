@@ -144,7 +144,7 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
 # Grab & check https://check.torproject.org
   if [ ! -f $filestr1 ]; then
     curl -x socks5h://$lanip:9050 --connect-timeout 10 -o $filestr1 https://check.torproject.org 2>/dev/null
-    if [ -f $filestr1  ]; then
+    if [ -f $filestr1 ]; then
       check=$(cat $filestr1 | grep -m 1 "Congrat")
       torip=$(cat $filestr1 | grep strong | cut -f3 -d'>' | cut -f1 -d'<')
       torstr=$(echo ${check/browser/device} | cut -f2- -d' ')
