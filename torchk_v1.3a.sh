@@ -38,9 +38,11 @@
 # - Change hourly crontab check to 5 minutes if failed
 
 # Used:
-# - /etc/tor/torchk.sh                  - Folder holds 'this script' and its output-file
+# - /etc/tor/torchk.sh                  - Folder holds 'this script'
 # - /var/log/tor/torchk.log             - The actual 'log file'
 # - /tmp/torchk.html                    - Holds 'collected data'
+# - /etc/crontabs/root                  - System crontab file (to be adjusted)
+# - /tmp/root.tmp                       - Temporary crontab file (is deleted)
 
 # TODO:
 #
@@ -48,7 +50,7 @@
 # Parameters
 # ==========
 # Program version
-Pversion=1.3
+Pversion=1.3a
 # Set log parameter
 OUTPUT=/var/log/tor/torchk.log
 # Set output file parameter
