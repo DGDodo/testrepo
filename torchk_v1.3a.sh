@@ -71,7 +71,7 @@ lanip=$(uci show | grep lan.ipaddr | cut -d\' -f2)
 # Function change crontab to every 5 minutes
 CronTabChange() {
 if [ -e /tmp/root.tmp ]; then rm /tmp/root.tmp; fi
-if [ -e /etc/crontabs/root ]; then cat /etc/crontabs/root | grep -v /etc/tor/torchk.sh > /tmp/root.tmp
+if [ -e /etc/crontabs/root ]; then cat /etc/crontabs/root | grep -v /etc/tor/torchk.sh > /tmp/root.tmp; fi
 if [ "$1" = "ok" ]; then echo "  0 * * * * /etc/tor/torchk.sh" >> /tmp/root.tmp; fi
 if [ "$1" = "error" ]; then echo "0/5 * * * * /etc/tor/torchk.sh" >> /tmp/root.tmp; fi
 cp -f /tmp/root.tmp /etc/crontabs/root
