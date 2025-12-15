@@ -81,17 +81,20 @@ rm /tmp/root.tmp
 # Function LEDs (on=error or off=OK)
 AdjustLEDs() {
 if [ "$1" = "on" ]; then 
-  LEDon="none";
-  LEDoff="default-on";
+  LEDon="none"
+  LEDoff="default-on"
+  CronTabChange "error"
 fi
 if [ "$1" = "off" ]; then
-  LEDon="default-on";
-  LEDoff="none";
+  LEDon="default-on"
+  LEDoff="none"
+  CronTabChange "ok"
 fi
 if [ "$1" = "blink" ]; then
   LEDon="none"
   LEDoff="timer"
   LEDdelay=250
+  CronTabChange "error"
 fi
 if [ $DEVICE = "avm,fritzbox-4040" ]; then 
   echo $LEDoff > /sys/class/leds/red:info/trigger;
@@ -142,16 +145,13 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
       if [ -n "$check" ]; then
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "$torstr" >> $OUTPUT
         AdjustLEDs "off"
-        CronTabChange "ok"
       else
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "Did not work properly." >>$OUTPUT
         AdjustLEDs "on"
-        CronTabChange "error"
       fi
     else
       printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" " " "Download failed!" >>$OUTPUT
       AdjustLEDs "on"
-      CronTabChange "error"
     fi
   fi
 else
@@ -160,7 +160,6 @@ else
   if [ ! "$(service tor status)" = "running" ]; then 
     echo "Service 'Tor' is not running.";
     AdjustLEDs "blink"
-    CronTabChange "error"
   fi
 fi
 
