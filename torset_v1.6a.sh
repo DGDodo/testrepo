@@ -216,7 +216,7 @@ fi
 # Get default WAN mac address:
 if [ -f /sys/class/net/wan/address ]; then MACADDR=$(cat /sys/class/net/wan/address); fi
 # if empty we try the 'find /sys' methode:
-if [ -z $MACADDR ] && [ -n $(find /sys | grep wan | grep address) ]; then MACADDR=$(cat $(find /sys | grep wan | grep address)); fi
+if [ -z $MACADDR ] && [ -n "$(find /sys | grep wan | grep address)" ]; then MACADDR=$(cat $(find /sys | grep wan | grep address)); fi
 # if empty try eth1 (VMware) location:
 if [ -z $MACADDR ] && [ -f /sys/class/net/eth1/address ]; then MACADDR=$(cat /sys/class/net/eth1/address); fi
 # if still empty, ask for WAN mac input:
