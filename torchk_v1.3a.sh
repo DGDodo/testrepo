@@ -97,18 +97,18 @@ if [ "$1" = "blink" ]; then
   CronTabChange "error"
 fi
 if [ $DEVICE = "avm,fritzbox-4040" ]; then 
-  echo $LEDoff > /sys/class/leds/red:info/trigger;
+  echo $LEDoff > /sys/class/leds/red:info/trigger
   if [ $LEDoff = "timer" ]; then
-    echo $LEDdelay > /sys/class/leds/red:info/delay_on;
-    echo $LEDdelay > /sys/class/leds/red:info/delay_off;
+    echo $LEDdelay > /sys/class/leds/red:info/delay_on
+    echo $LEDdelay > /sys/class/leds/red:info/delay_off
   fi
 fi
 if [ $DEVICE = "linksys,whw03v2" ]; then
-  echo $LEDoff > /sys/class/leds/red:indicator/trigger;
-  echo $LEDon > /sys/class/leds/green:indicator/trigger;
+  echo $LEDoff > /sys/class/leds/red:indicator/trigger
+  echo $LEDon > /sys/class/leds/green:indicator/trigger
   if [ $LEDoff = "timer" ]; then
-    echo $LEDdelay > /sys/class/leds/red:indicator/delay_on;
-    echo $LEDdelay > /sys/class/leds/red:indicator/delay_off;
+    echo $LEDdelay > /sys/class/leds/red:indicator/delay_on
+    echo $LEDdelay > /sys/class/leds/red:indicator/delay_off
   fi
 fi
 }
@@ -158,7 +158,7 @@ else
   if [ "$DEVICE" = "" ]; then echo "This is not an OpenWrt device."; fi
   if [ $progid -eq 0 ]; then echo "Package 'curl' is not installed."; fi
   if [ ! "$(service tor status)" = "running" ]; then 
-    echo "Service 'Tor' is not running.";
+    echo "Service 'Tor' is not running."
     AdjustLEDs "blink"
   fi
 fi
