@@ -35,6 +35,7 @@
 # - What should be the starting LED config of both devices?
 #   WHW03 is blue but trigger status says "none"
 #   F4040 is as required (Info LED off)
+# - Change hourly crontab check to 5 minutes if failed
 
 # Used:
 # - /etc/tor/torchk.sh                  - Folder holds 'this script' and its output-file
@@ -42,7 +43,7 @@
 # - /tmp/torchk.html                    - Holds 'collected data'
 
 # TODO:
-# - Change hourly crontab check to 5 or 10 minutes if failed?
+#
 
 # Parameters
 # ==========
@@ -67,6 +68,16 @@ lanip=$(uci show | grep lan.ipaddr | cut -d\' -f2)
 
 # Functions
 # =========
+# Function change crontab to every 5 minutes
+CronTabChange() {
+if [ -e /tmp/root.tmp ]; then rm /tmp/root.tmp; fi
+if [ -e /etc/crontabs/root ]; then cat /etc/crontabs/root | grep -v /etc/tor/torchk.sh > /tmp/root.tmp
+if [ "$1" = "ok" ]; then echo "  0 * * * * /etc/tor/torchk.sh" >> /tmp/root.tmp; fi
+if [ "$1" = "error" ]; then echo "0/5 * * * * /etc/tor/torchk.sh" >> /tmp/root.tmp; fi
+cp -f /tmp/root.tmp /etc/crontabs/root
+rm /tmp/root.tmp
+}
+
 # Function LEDs (on=error or off=OK)
 AdjustLEDs() {
 if [ "$1" = "on" ]; then 
@@ -131,21 +142,25 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
       if [ -n "$check" ]; then
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "$torstr" >> $OUTPUT
         AdjustLEDs "off"
+        CronTabChange "ok"
       else
         printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" "$torip" "Did not work properly." >>$OUTPUT
         AdjustLEDs "on"
+        CronTabChange "error"
       fi
     else
       printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" " " "Download failed!" >>$OUTPUT
       AdjustLEDs "on"
+      CronTabChange "error"
     fi
   fi
 else
   if [ "$DEVICE" = "" ]; then echo "This is not an OpenWrt device."; fi
   if [ $progid -eq 0 ]; then echo "Package 'curl' is not installed."; fi
   if [ ! "$(service tor status)" = "running" ]; then 
-    echo "Service 'tor' is not running.";
+    echo "Service 'Tor' is not running.";
     AdjustLEDs "blink"
+    CronTabChange "error"
   fi
 fi
 
