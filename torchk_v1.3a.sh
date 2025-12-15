@@ -123,6 +123,8 @@ echo ""
 echo "========================================"
 echo "            TorRouter Check        v"$Pversion
 echo "========================================"
+echo "Tor check log for TorRouter.nl"
+echo ""
 echo "Start:      "$(date)
 
 # Log header
@@ -160,9 +162,12 @@ if [ ! "$DEVICE" = "" ] && [ ! $progid -eq 0 ] && [ "$(service tor status)" = "r
 else
   if [ "$DEVICE" = "" ]; then echo "This is not an OpenWrt device."; fi
   if [ $progid -eq 0 ]; then echo "Package 'curl' is not installed."; fi
-  if [ ! "$(service tor status)" = "running" ]; then 
+  if [ ! "$(service tor status)" = "running" ]; then
     echo "Service 'Tor' is not running."
     AdjustLEDs "blink"
+    if [ -f $OUTPUT ]; then
+      printf "%5d | %-29s| %-16s| %s\n" "$progid" "$(date)" " " "Service 'Tor' is not running." >>$OUTPUT
+    fi
   fi
 fi
 
