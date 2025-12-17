@@ -32,10 +32,10 @@
 #   defect working Tor =  F4040 -> steady red info LED    / WHW03->steady red LED
 #   missing working Tor = F4040 -> blinking red info LED  / WHW03->blinking red LED
 # - Added red blinking (info) LED for Tor not running
-# - What should be the starting LED config of both devices?
+# - What should be the starting LED config of both devices? Change /etc/rc.local?
 #   WHW03 is blue but trigger status says "none"
 #   F4040 is as required (Info LED off)
-# - Change hourly crontab check to 5 minutes if failed
+# - Change hourly crontab check to 5 minutes if failed, back to hourly if ok
 
 # Used:
 # - /etc/tor/torchk.sh                  - Folder holds 'this script'
