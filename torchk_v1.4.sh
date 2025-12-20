@@ -13,7 +13,7 @@
 # Returns using Tor correctly or not and adjust LED configuration accordingly.
 
 # v1.4 (Final release TorRouter 24.10.4 with torset_v1.7.sh)
-# - Use of function(s) for LED changes in the program 
+# - Use of function(s) for LED changes in the program
 #   good working Tor =    F4040 -> info LED off           / WHW03->steady green LED
 #   defect working Tor =  F4040 -> steady red info LED    / WHW03->steady red LED
 #   missing working Tor = F4040 -> blinking red info LED  / WHW03->blinking red LED
@@ -85,7 +85,7 @@ fi
 
 # Function LEDs (on=error or off=OK)
 AdjustLEDs() {
-if [ "$1" = "on" ]; then 
+if [ "$1" = "on" ]; then
   LEDon="none"
   LEDoff="default-on"
   CronTabChange "error"
@@ -101,7 +101,7 @@ if [ "$1" = "blink" ]; then
   LEDdelay=250
   CronTabChange "error"
 fi
-if [ $DEVICE = "avm,fritzbox-4040" ]; then 
+if [ $DEVICE = "avm,fritzbox-4040" ]; then
   echo $LEDoff > /sys/class/leds/red:info/trigger
   if [ $LEDoff = "timer" ]; then
     echo $LEDdelay > /sys/class/leds/red:info/delay_on
