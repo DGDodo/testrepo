@@ -16,6 +16,7 @@
 #               - Changing deletion of wan6
 # Fixed:        - Get MACADDR for vmware adjusted
 # Changed:      - Adjusted crontab info for torchk.sh
+#               - torchk.sh (v1.4) does change crontab on error to every 5 minutes
 # Added:        - Custom Command: Run Tor check
 #               - Tor check in rc.local for 1st check (within builds)
 #
