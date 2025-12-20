@@ -66,7 +66,7 @@
 # Set static Parameters
 # ---------------------
 # Set program version
-Pversion=1.7
+Pversion=1.6
 # Set hostname TorRouter
 HOSTNAME=TorRouter
 # Set TorRouter default ip
