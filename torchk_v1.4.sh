@@ -12,7 +12,7 @@
 # It is used with TorRouter to check good working Tor every hour, with crontab.
 # Returns using Tor correctly or not and adjust LED configuration accordingly.
 
-# v1.4 (Final release TorRouter 24.10.4 with torset_v1.7.sh)
+# v1.4 (Final release TorRouter 24.10.5 with torset_v1.7.sh)
 # - Use of function(s) for LED changes in the program
 #   good working Tor =    F4040 -> info LED off           / WHW03->steady green LED
 #   defect working Tor =  F4040 -> steady red info LED    / WHW03->steady red LED
