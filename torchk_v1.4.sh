@@ -12,27 +12,13 @@
 # It is used with TorRouter to check good working Tor every hour, with crontab.
 # Returns using Tor correctly or not and adjust LED configuration accordingly.
 
-# v1.2
-# - Added curl check if installed
-# - Added /etc/tor/torchk.log (output of script)
-# - Added check Tor = running
-# - Added Tor ip in log
-# - Added get local lan ip
-# - Added log header and adjusted output layout
-# - Added Program version (also in log output, v1.2)
-# v1.3 (Final release TorRouter 24.10.4 with torset_v1.6.sh)
-# - Adjust LED according status (device independent, F4040 & WHW03)
-# - Use same log location for torchk.log as Tor: /var/log/tor/
-#   Every reboot a new torchk log.
-#   Needs also 'Custom Commands' change in torset_v1.6.sh (Done)
-
-# v1.4 (future)
+# v1.4 (Final release TorRouter 24.10.4 with torset_v1.7.sh)
 # - Use of function(s) for LED changes in the program 
 #   good working Tor =    F4040 -> info LED off           / WHW03->steady green LED
 #   defect working Tor =  F4040 -> steady red info LED    / WHW03->steady red LED
 #   missing working Tor = F4040 -> blinking red info LED  / WHW03->blinking red LED
 # - Added red blinking (info) LED for Tor not running
-# - What should be the starting LED config of both devices? Change /etc/rc.local?
+# - What should be the starting LED config of both devices? Changed in builds: /etc/rc.local
 #   WHW03 is blue but trigger status says "none"
 #   F4040 is as required (Info LED off)
 # - Change hourly crontab check to 5 minutes if failed, back to hourly if ok
@@ -43,6 +29,20 @@
 # - /tmp/torchk.html                    - Holds 'collected data'
 # - /etc/crontabs/root                  - System crontab file (to be adjusted)
 # - /tmp/root.tmp                       - Temporary crontab file (is deleted)
+
+# v1.3 (Final release TorRouter 24.10.4 with torset_v1.6.sh)
+# - Adjust LED according status (device independent, F4040 & WHW03)
+# - Use same log location for torchk.log as Tor: /var/log/tor/
+#   Every reboot a new torchk log.
+#   Needs also 'Custom Commands' change in torset_v1.6.sh (Done)
+# v1.2 (primairy release)
+# - Added curl check if installed
+# - Added /etc/tor/torchk.log (output of script)
+# - Added check Tor = running
+# - Added Tor ip in log
+# - Added get local lan ip
+# - Added log header and adjusted output layout
+# - Added Program version (also in log output, v1.2)
 
 # TODO:
 #
