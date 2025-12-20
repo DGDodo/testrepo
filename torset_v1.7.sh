@@ -887,7 +887,8 @@ fi
 # =start==========================================
 # Turn off blue LED for WHW03 only
 if [ "$DEVICE" = "linksys,whw03v2" ]; then
-  uci add system led
+  echo "Turn off blue LED for WHW03." | tee -a "$OUTPUT"
+  echo "--------------------------------------------------------------------------------" >> $OUTPUT  uci add system led
   uci set system.@led[-1].sysfs='blue:indicator'
   uci set system.@led[-1].trigger='none'
   uci set system.@led[-1].default='1'
