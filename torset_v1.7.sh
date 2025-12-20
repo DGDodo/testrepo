@@ -640,8 +640,6 @@ else
 fi
 
 # /etc/nftables.d/tor.sh will be created if not already exist
-echo "Adjust firewall settings." | tee -a "$OUTPUT"
-echo "--------------------------------------------------------------------------------" >> $OUTPUT
 if [ ! -f /etc/nftables.d/tor.sh ]; then
   echo " - Create & make executable file: '/etc/nftables.d/tor.sh'" | tee -a "$OUTPUT"
   cat << "EOF" > /etc/nftables.d/tor.sh
@@ -756,7 +754,8 @@ echo "Check & adjust crontab." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 if [ ! "$vCurl" = "not installed" ];then
   if [ -f /etc/tor/torchk.sh ] && [ ! -f /etc/crontabs/root ]; then
-    cat << "EOF" > # Info: https://openwrt.org/docs/guide-user/base-system/cron
+    cat << "EOF" > /etc/crontabs/root
+# Info: https://openwrt.org/docs/guide-user/base-system/cron
 # TorRouter.nl version for Tor check. (scripted)
 # .----------- Minute (0 - 59)
 # | .--------- Hour (0 - 23)
@@ -769,7 +768,7 @@ if [ ! "$vCurl" = "not installed" ];then
   0 * * * * /etc/tor/torchk.sh
 EOF
   else
-    if ! grep -q "/etc/tor/torchk.sh" /etc/tor/torchk.sh; then
+    if ! grep -q "/etc/tor/torchk.sh" /etc/crontabs/root; then
       echo "  0 * * * * /etc/tor/torchk.sh" >> /etc/crontabs/root
     fi
   fi
