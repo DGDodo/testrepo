@@ -11,15 +11,15 @@
 # It will rename the device and setup all needed for Tor and Privoxy to work properly.
 
 # v1.7
-# testing:      - Get ride of message: daemon.warn odhcpd[1246]: No default route present, setting ra_lifetime to 0!
+# testing:      - Changing deletion of wan6 (still not fully deleted?)
+# Fixed:        - Get ride of message: daemon.warn odhcpd[1246]: No default route present, setting ra_lifetime to 0!
 #                 Disable dhcpv6 for lan: uci set network.lan.ipv6='0'
-#               - Changing deletion of wan6 (still not fully deleted?)
-#               - Turn off default blue LED on WHW03 (done in /etc/rc.local)
-# Fixed:        - Get MACADDR for vmware adjusted
+#               - Get MACADDR for vmware adjusted
 # Changed:      - Adjusted crontab info for torchk.sh
-#               - torchk.sh (v1.4) does change crontab on error to every 5 minutes
+#               - torchk.sh (v1.4) does change crontab on error to every 5 minutes, back to hourly if ok
 # Added:        - Custom Command: Run Tor check
 #               - Tor check in rc.local for 1st check (within builds)
+#               - Turn off default blue LED on WHW03 (done in /etc/rc.local)
 #
 # v1.6
 # Added:         - Program version for output etc.
@@ -876,7 +876,7 @@ fi
 # Make sure irqbalance is started
 echo "Check and start irqbalance settings." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
-if [ ! $vIrqb = "not installed" ]; then 
+if [ ! $vIrqb = "not installed" ]; then
   if [ -z $(uci show irqbalance.irqbalance.enabled | grep 1) ]; then
     uci set irqbalance.irqbalance.enabled='1'
     uci commit irqbalance
