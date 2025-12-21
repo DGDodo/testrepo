@@ -14,7 +14,7 @@
 # testing:      - Get ride of message: daemon.warn odhcpd[1246]: No default route present, setting ra_lifetime to 0!
 #                 Disable dhcpv6 for lan: uci set network.lan.ipv6='0'
 #               - Changing deletion of wan6 (still not fully deleted?)
-#               - Turn off default blue LED on WHW03
+#               - Turn off default blue LED on WHW03 (done in /etc/rc.local)
 # Fixed:        - Get MACADDR for vmware adjusted
 # Changed:      - Adjusted crontab info for torchk.sh
 #               - torchk.sh (v1.4) does change crontab on error to every 5 minutes
@@ -882,20 +882,6 @@ if [ ! $vIrqb = "not installed" ]; then
     uci commit irqbalance
   fi
 fi
-
-# SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
-# =start==========================================
-# Turn off blue LED for WHW03 only
-if [ "$DEVICE" = "linksys,whw03v2" ]; then
-  echo "Turn off blue LED for WHW03." | tee -a "$OUTPUT"
-  echo "--------------------------------------------------------------------------------" >> $OUTPUT  uci add system led
-  uci set system.@led[-1].sysfs='blue:indicator'
-  uci set system.@led[-1].trigger='none'
-  uci set system.@led[-1].default='1'
-fi
-# =end============================================
-# SPECIAL for Linksys WHW03 v2 (MACADDR vs MACLAN)
-
 
 #
 # 3) END
