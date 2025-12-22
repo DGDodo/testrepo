@@ -8,9 +8,10 @@
 # For use with http://TorRouter.nl
 #
 # This script is for TorRouter devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64.
-# Program uses Tor and curl to grab 'check.torproject.org'.
-# It is used with TorRouter to check good working Tor every hour, with crontab.
-# Returns using Tor correctly or not and adjust LED configuration accordingly.
+# Program uses crontabs, Tor and curl to grab 'https://check.torproject.org'.
+# It is used to check good working Tor every hour with crontab and changes hourly crontab
+# to check every 5 minutes if failed, back to hourly if ok.
+# Returns using Tor correctly or not and adjust LEDs accordingly.
 
 # v1.4 (Final release TorRouter 24.10.5 with torset_v1.7.sh)
 # - Use of function(s) for LED changes in the program
@@ -19,9 +20,8 @@
 #   missing working Tor = F4040 -> blinking red info LED  / WHW03->blinking red LED
 # - Added red blinking (info) LED for Tor not running
 # - What should be the starting LED config of both devices? Changed in builds: /etc/rc.local
-#   WHW03 is blue but trigger status says "none"
+#   WHW03 is blue but trigger status says "none" Changed in builds: /etc/rc.local
 #   F4040 is as required (Info LED off)
-# - Change hourly crontab check to 5 minutes if failed, back to hourly if ok
 
 # Used:
 # - /etc/tor/torchk.sh                  - Folder holds 'this script'
