@@ -417,6 +417,9 @@ fi
 vLAC=$(opkg list-installed | grep 'luci-app-commands' | cut -c 21-)
 if [ ${#vLAC} -eq 0 ]; then vLAC="not installed"; fi
 
+# Check if all needed files are available
+#
+
 # Check if processes are running?
 # service |grep tor
 # service |grep privoxy - this does not work! Privoxy looks stopped, use 'ps | grep privoxy | grep -v root'
