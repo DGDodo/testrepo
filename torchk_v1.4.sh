@@ -10,8 +10,7 @@
 # This script is for TorRouter devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64.
 # Program uses crontabs, Tor and curl to grab 'https://check.torproject.org'.
 # It is used to check good working Tor every hour with crontab and changes hourly crontab
-# to check every 5 minutes if failed, back to hourly if ok.
-# Returns using Tor correctly or not and adjust LEDs accordingly.
+# to check every 5 minutes if failed, back to hourly if ok and adjust LEDs accordingly.
 
 # v1.4 (Final release TorRouter 24.10.5 with torset_v1.7.sh)
 # - Use of function(s) for LED changes in the program
