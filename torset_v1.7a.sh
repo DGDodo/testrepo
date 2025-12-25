@@ -9,6 +9,7 @@
 #
 # This script is for OpenWrt devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64.
 # It will rename the device and setup all needed for Tor and Privoxy to work properly.
+# Shoud only be used on TorRouter builds of OpenWrt.
 
 # v1.7
 # testing:      - Changing deletion of wan6 (still not fully deleted?)
@@ -22,7 +23,7 @@
 #               - Turn off default blue LED on WHW03 (done in /etc/rc.local)
 #
 # TODO:         - Check all needed files before continue, stop if it is not all ok
-#                 No file creation in this script? Only /etc/crontabs/root
+#                 No file creation in this script?  /etc/crontabs/root should also be in builds?
 
 # v1.6
 # Added:         - Program version for output etc.
@@ -541,7 +542,7 @@ uci commit system
 echo "Correct setup WAN and LAN." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
 uci del firewall.@zone[1].network
-uci -q del network.wan=interface
+uci del network.wan=interface
 uci set network.wan=interface
 if [ $DEVICE = "vmware-inc-vmware7-1" ]; then
   uci set network.wan.device='eth1'
@@ -557,7 +558,8 @@ uci add_list firewall.@zone[1].network='wan'
 # Remove wan6
 uci del network.wan6
 uci set network.globals.packet_steering='1'
-uci commit
+uci commit firewall
+uci commit network
 
 # Set LAN
 uci set network.lan=interface
