@@ -3,7 +3,7 @@
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
-# dec 2025 v1.7a                 torset.sh
+# dec 2025 v1.8                  torset.sh
 #
 # For use with http://TorRouter.nl
 #
@@ -11,8 +11,12 @@
 # It will rename the device and setup all needed for Tor and Privoxy to work properly.
 # Shoud only be used on TorRouter builds of OpenWrt.
 
-# v1.7
+# v1.8
+# Changed       - No file creation in this script, all needed files should be in TorRouter builds
+#               - All needed Files are checked before continue question
 # testing:      - Changing deletion of wan6 (still not fully deleted?)
+
+# v1.7
 # Fixed:        - Get ride of message: daemon.warn odhcpd[1246]: No default route present, setting ra_lifetime to 0!
 #                 Disable dhcpv6 for lan: uci set network.lan.ipv6='0'
 #               - Get MACADDR for vmware adjusted
@@ -21,9 +25,6 @@
 # Added:        - Custom Command: Run Tor check
 #               - Tor check in rc.local for 1st check (within builds)
 #               - Turn off default blue LED on WHW03 (done in /etc/rc.local)
-#
-# TODO:         - Check all needed files before continue, stop if it is not all ok
-#                 No file creation in this script?  /etc/crontabs/root should also be in builds?
 
 # v1.6
 # Added:         - Program version for output etc.
@@ -74,7 +75,7 @@
 # ---------------------
 
 # Set program version
-Pversion=1.7a
+Pversion=1.8
 # Set hostname TorRouter
 HOSTNAME=TorRouter
 # Set TorRouter default ip
@@ -419,7 +420,38 @@ vLAC=$(opkg list-installed | grep 'luci-app-commands' | cut -c 21-)
 if [ ${#vLAC} -eq 0 ]; then vLAC="not installed"; fi
 
 # Check if all needed files are available
-#
+missing=""
+# /etc/tor/torrc (should contain 'SOCKSPort 192.168.100.1:9050')
+if [ -f /etc/tor/torrc ]; then
+  if grep -q "SOCKSPort 192.168.100.1:9050" /etc/tor/torrc; then
+    missing=$'"/etc/tor/torrc" is not correctly adjusted!\n'
+  fi
+else
+  missing=$'"/etc/tor/torrc" is missing!\n'
+fi
+# /etc/tor/custom
+if [ -f /etc/tor/custom ]; then missing=$missing$'"/etc/tor/custom" is missing.\n'; fi
+# /etc/tor/torchk.sh (executable)
+if [ -f /etc/tor/torchk.sh ]; then missing=$missing$'"/etc/tor/torchk.sh" is missing.\n'; fi
+# /etc/tor/torset_vx.y.sh (executable) is "this" file so does not need to be checked
+# /etc/nftables.d/tor.sh (executable)
+if [ -f /etc/nftables.d/tor.sh ]; then missing=$missing$'"/etc/nftables.d/tor.sh" is missing.\n'; fi
+# /etc/rc.local (adjusted, contains TorRouter?)
+if [ -f /etc/rc.local ]; then
+  if grep -q "TorRouter" /etc/rc.local; then
+    missing=$missing$'"/etc/rc.local" is not correctly adjusted.\n'
+  fi
+else
+  missing=$missing$'"/etc/rc.local" is missing.\n'
+fi
+# /etc/sysupgrade.conf (contains /etc/tor)
+if [ -f /etc/sysupgrade.conf ]; then
+  if grep -q "/etc/tor/" /etc/sysipgrade.conf; then
+    missing=$missing$'"etc/sysupgrade.con" is not correctly adjusted.\n'
+  fi
+else
+  missing=$missing$'"/etc/sysupgrade.conf" is missing.\n'
+fi
 
 # Check if processes are running?
 # service |grep tor
@@ -459,11 +491,19 @@ if [ $count -ge 1 ]; then
   done
 fi
 if [ $DEVICE = "zyxel,p-2812hnu-f1" ]; then
-  echo "" | tee -a "$OUTPUT"
-  echo "This device: '"$DEVICE"', does not support "$HOSTNAME"." | tee -a "$OUTPUT"
-  echo "Program will stop here and nothing is changed." | tee -a "$OUTPUT"
-  echo "" | tee -a "$OUTPUT"
+  echo "" | tee -a
+  echo "This device: '"$DEVICE"', does not support "$HOSTNAME"."
+  echo "Program will stop here and nothing is changed."
+  echo ""
   rm -rf $OUTPUT>/dev/null;
+  exit;
+fi
+if [ missing != "" ]; then
+  echo "There are issues with the configuration:"
+  echo "$missing"
+  echo "Program will stop here and nothing is changed."
+  echo ""
+  rm -rf $OUTPUT>/dev/null;  
   exit;
 fi
 echo "" | tee -a "$OUTPUT"
@@ -572,103 +612,7 @@ uci set network.lan.delegate='0'
 uci set network.lan.ipv6='0'
 uci commit network
 
-# Create (if not already exist) or adjust needed files.
-echo "Check and adjust or create needed files." | tee -a "$OUTPUT"
-echo "--------------------------------------------------------------------------------" >> $OUTPUT
-
-# /etc/tor/custom
-if [ ! -f /etc/tor/custom ]; then
-  echo " - Creating file: /etc/tor/custom" | tee -a "$OUTPUT"
-  cat << EOF > /etc/tor/custom
-AutomapHostsOnResolve 1
-AutomapHostsSuffixes .
-VirtualAddrNetworkIPv4 172.16.0.0/12
-VirtualAddrNetworkIPv6 [fc00::]/8
-DNSPort 0.0.0.0:9053
-DNSPort [::]:9053
-TransPort 0.0.0.0:9040
-TransPort [::]:9040
-EOF
-else
-  echo " - File: '/etc/tor/custom' already exist." | tee -a "$OUTPUT"
-fi
-
-# F4040 only start
-# ==========================================================================
-# Adjust /etc/rc.local if not done already
-if [ "$DEVICE" = "avm,fritzbox-4040" ]; then
-  if [ "$vIrqb" = "not installed" ]; then
-    echo " - Package 'irqbalance' is not installed!" | tee -a "$OUTPUT"
-  else
-#   if [ -f /etc/rc.local ] && [ -z $(cat /etc/rc.local | grep "echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor") ]; then
-    if [ -f /etc/rc.local ] && ! grep -q "echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor" /etc/rc.local; then
-      echo " - Adjusting '/etc/rc.local'." | tee -a "$OUTPUT"
-      cp /etc/rc.local /etc/rc.old.local
-      rm -rf /etc/rc.local
-      cat /etc/rc.old.local | grep -v "exit 0" > /etc/rc.local
-      cat << EOF >> /etc/rc.local
-# TorRouter dec 2025 - Fritz!Box 4040 version (scripted)
-# info: torrouter.nl
-# email: torrouter@proton.me or torrouter@protonmail.com
-# According: https://forum.openwrt.org/t/fritz-box-4040-experiences/64487/5
-echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
-
-# Run Tor check once (start):
-/etc/tor/torchk.sh
-
-# Put your custom commands below here -before exit 0- that should be executed
-# once the system init finished. By default this file does nothing.
-
-exit 0
-EOF
-    else
-      echo " - File: 'rc.local' already adjusted." | tee -a "$OUTPUT"
-    fi
-  fi
-fi
-# ==========================================================================
-# F4040 only end
-
-# Adjust /etc/sysupgrade.conf if not done already.
-if ! grep -q "/etc/tor" /etc/sysupgrade.conf; then
-  echo " - Adjusting '/etc/sysupgrade.conf'." | tee -a "$OUTPUT"
-  cp /etc/sysupgrade.conf /etc/sysupgrade.old.conf
-  rm -rf /etc/sysupgrade.conf
-  cat /etc/sysupgrade.old.conf | grep -v "# /etc/example.conf" | grep -v "# /etc/openvpn/" > /etc/sysupgrade.conf
-  cat << EOF >> /etc/sysupgrade.conf
-
-# TorRouter dec 2025 (scripted)
-# info: torrouter.nl
-# email: torrouter@proton.me or torrouter@protonmail.com
-# We use https://openwrt.org/docs/guide-user/services/tor/client
-# Folder added in config saves:
-/etc/tor
-
-# /etc/example.conf
-# /etc/openvpn/
-EOF
-else
-  echo " - File: '/etc/sysupgrade.conf' already adjusted." | tee -a "$OUTPUT"
-fi
-
-# /etc/nftables.d/tor.sh will be created if not already exist
-if [ ! -f /etc/nftables.d/tor.sh ]; then
-  echo " - Create & make executable file: '/etc/nftables.d/tor.sh'" | tee -a "$OUTPUT"
-  cat << "EOF" > /etc/nftables.d/tor.sh
-TOR_CHAIN="dstnat_$(uci -q get firewall.tcp_int.src)"
-TOR_RULE="$(nft -a list chain inet fw4 ${TOR_CHAIN} \
-| sed -n -e "/Intercept-TCP/p")"
-nft replace rule inet fw4 ${TOR_CHAIN} \
-handle ${TOR_RULE##* } \
-fib daddr type != { local, broadcast } ${TOR_RULE}
-EOF
-else
-  echo " - File: '/etc/nftables.d/tor.sh' already exist." | tee -a "$OUTPUT"
-fi
-# Check & make /etc/tor/nftables.d/tor/sh executable:
-if [ ! -x /etc/nftables.d/tor.sh ]; then
-  chmod +x /etc/nftables.d/tor.sh
-fi
+# Create (if not already exist) or adjust needed files. (REMOVED in v1.8)
 
 # Adjust tor settings (1. Tor client)
 echo "Add tor settings." | tee -a "$OUTPUT"
