@@ -452,6 +452,8 @@ if [ -f /etc/sysupgrade.conf ]; then
 else
   missing=$missing$'"/etc/sysupgrade.conf" is missing.\n'
 fi
+# /etc/crontabs/root
+if [ -f /etc/crontabs/root]; then missing=$missing$'"/etc/crontabs/root" is missing\n'; fi
 
 # Check if processes are running?
 # service |grep tor
@@ -703,32 +705,6 @@ if [ ! "$vPriv" = "not installed" ]; then
 fi
 
 # Additional TorRouter additions / adjustments
-
-# if /etc/tor/torchk.sh then check if /etc/crontab/root exist and holds torchk.sh already, if not add it
-# depends also on curl
-echo "Check & adjust crontab." | tee -a "$OUTPUT"
-echo "--------------------------------------------------------------------------------" >> $OUTPUT
-if [ ! "$vCurl" = "not installed" ];then
-  if [ -f /etc/tor/torchk.sh ] && [ ! -f /etc/crontabs/root ]; then
-    cat << "EOF" > /etc/crontabs/root
-# Info: https://openwrt.org/docs/guide-user/base-system/cron
-# TorRouter.nl version for Tor check. (scripted)
-# .----------- Minute (0 - 59)
-# | .--------- Hour (0 - 23)
-# | | .------- Day (1 - 31)
-# | | | .----- Month (1 - 12)
-# | | | | .--- Day of week (0 - 6) (Sunday =0)
-# | | | | |
-# v v v v v
-# * * * * * command to execute
-  0 * * * * /etc/tor/torchk.sh
-EOF
-  else
-    if ! grep -q "/etc/tor/torchk.sh" /etc/crontabs/root; then
-      echo "  0 * * * * /etc/tor/torchk.sh" >> /etc/crontabs/root
-    fi
-  fi
-fi
 
 # Add custom commands
 # Check if luci-app-commands is installed ?
