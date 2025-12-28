@@ -9,7 +9,7 @@
 #
 # This script is for OpenWrt devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64.
 # It will rename the device and setup all needed for Tor and Privoxy to work properly.
-# Should only be used on TorRouter builds of OpenWrt from http://torrouter.nl.
+# Should only be used on TorRouter builds of OpenWrt from http://torrouter.nl
 # More info email: torrouter@proton.me
 
 # v1.8
@@ -281,7 +281,7 @@ if [ "$MACADDR" = "$MACLAN" ]; then
     fi
   fi
  # =end============================================
- # SPECIAL for AVM Fritzbox F4040
+ # SPECIAL for AVM Fritzbox F4040 (MACADDR vs MACLAN)
 
 fi
 
@@ -534,15 +534,9 @@ if [ "$userinput" != "y" ]; then
 fi
 echo ""
 
-# TEMPORARLY
-#exit
-
 #
 # 2) PROGRAM
 # ==========
-
-# Install additional (missing?) packages here ?
-# Only if WAN is active / working ? Clean OpenWrt on WHW03 v2 does not have working WAN!
 
 # Stop services
 echo "Stop services." | tee -a "$OUTPUT"
@@ -653,7 +647,6 @@ uci add_list dhcp.@dnsmasq[0].server="::1#9053"
 #  Adjust tor settings (3. Firewall)
 #
 # Adjust firewall settings / Intercept TCP traffic
-#
 uci -q delete firewall.tor_nft
 uci set firewall.tor_nft="include"
 uci set firewall.tor_nft.path="/etc/nftables.d/tor.sh"
@@ -776,7 +769,6 @@ if [ ! "$vLAC" = "not installed" ]; then
 fi
 
 # Set Wifi device(s)
-#
 if [ $count -gt 0 ]; then
   echo "Set and activate Wifi(s) according device." | tee -a "$OUTPUT";
   echo "--------------------------------------------------------------------------------" >> $OUTPUT
