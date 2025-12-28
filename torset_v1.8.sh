@@ -9,7 +9,8 @@
 #
 # This script is for OpenWrt devices: Fritz!box 4040, Linksys WHW03 v2, vmware x86_64.
 # It will rename the device and setup all needed for Tor and Privoxy to work properly.
-# Shoud only be used on TorRouter builds of OpenWrt.
+# Should only be used on TorRouter builds of OpenWrt from http://torrouter.nl.
+# More info email: torrouter@proton.me
 
 # v1.8
 # Changed       - No file creation in this script, all needed files should be in TorRouter builds

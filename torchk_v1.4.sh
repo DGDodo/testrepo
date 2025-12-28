@@ -11,6 +11,7 @@
 # Program uses crontabs, Tor and curl to grab 'https://check.torproject.org'.
 # It is used to check good working Tor every hour with crontab and changes hourly crontab
 # to check every 5 minutes if failed, back to hourly if ok and adjust LEDs accordingly.
+# More info email: torrouter@proton.me
 
 # v1.4 (Final release TorRouter 24.10.5 with torset_v1.7.sh)
 # - Use of function(s) for LED changes in the program
