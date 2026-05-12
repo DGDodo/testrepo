@@ -3,7 +3,7 @@
 # ========================================
 #          SCRIPT TORROUTER SETUP
 # ========================================
-# dec 2025 v1.8                  torset.sh
+# may 2026 v1.8                  torset.sh
 #
 # For use with http://TorRouter.nl
 #
@@ -15,6 +15,7 @@
 # v1.8
 # Changed       - No file creation in this script, all needed files should be in TorRouter builds
 #               - All needed Files are checked before continue question
+#               - All opkg checks with apk checks, as of OpenWrt v25.12.x
 # testing:      - Changing deletion of wan6 (still not fully deleted?)
 
 # v1.7
@@ -397,27 +398,27 @@ if [ $(echo $OPENVER | cut -f1 -d.) -ge 19 ] && [ ${#WIFIPASS} -gt 7 ]; then WIF
 # ---------------------
 
 # Get Privoxy version:
-vPriv=$(opkg list-installed | grep 'privoxy' | grep -v 'luci-' | cut -c 11-)
+vPriv=$(apk list --installed | grep 'privoxy' | grep -v 'luci' | cut -d" " -f1 | cut -d"-" -f2-)
 if [ ${#vPriv} -eq 0 ]; then vPriv="not installed"; fi
 
 # Get Tor version:
-vTor=$(opkg list-installed | grep 'tor - ' | grep -v 'luci-' | cut -c 7-)
+vTor=$(apk list --installed | grep 'tor-0' | cut -d" " -f1 | cut -d"-" -f2-)
 if [ ${#vTor} -eq 0 ]; then vTor="not installed"; fi
 
 # Get irqbalance version (F4040 & WHW03):
-vIrqb=$(opkg list-installed | grep irqbalance | grep -v luci | cut -f3 -d' ')
+vIrqb=$(apk list --installed | grep 'irqbalance' | grep -v 'luci' | cut -d" " -f1 | cut -d"-" -f2-)
 if [ ${#vIrqb} -eq 0 ]; then vIrqb="not installed"; fi
 
 # Get curl version:
 # And check if /etc/tor/torchk.sh exist and add text vTorchk to vCurl
 vTorchk=""
-vCurl=$(opkg list-installed | grep 'curl - ' | cut -c 8-)
+vCurl=$(apk list --installed | grep 'curl-' | cut -d" " -f1 | cut -d"-" -f2-)
 if [ ${#vCurl} -eq 0 ]; then vCurl="not installed"; else
   if [ -f /etc/tor/torchk.sh ]; then vTorchk="('torchk.sh' will be activated)"; fi
 fi
 
 # Get luci-app-commands version:
-vLAC=$(opkg list-installed | grep 'luci-app-commands' | cut -c 21-)
+vLAC=$(apk list --installed | grep 'luci-app-commands' | cut -d" " -f1 | cut -d"-" -f4-)
 if [ ${#vLAC} -eq 0 ]; then vLAC="not installed"; fi
 
 # Check if all needed files are available
@@ -561,10 +562,10 @@ echo "--------------------------------------------------------------------------
 uci show >> $OUTPUT
 echo "" >> $OUTPUT
 
-# Write installed opkg packages to log
+# Write all installed packages to log
 echo "List installed packages." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
-opkg list-installed >> $OUTPUT
+apk list --installed | cut -d" " -f1 >> $OUTPUT
 echo "" >> $OUTPUT
 
 # Set hostname & time settings
@@ -791,7 +792,7 @@ fi
 # Adjust uHTTPd https setting:
 echo "Change / adjust webserver settings." | tee -a "$OUTPUT"
 echo "--------------------------------------------------------------------------------" >> $OUTPUT
-if [ -n "$(opkg list-installed | grep 'luci-ssl-')" ]; then
+if [ -n "$(apk list --installed | grep 'luci-ssl-')" ]; then
   uci set uhttpd.main.redirect_https='on'
   uci commit uhttpd
 fi
