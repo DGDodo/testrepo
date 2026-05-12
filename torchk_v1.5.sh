@@ -57,7 +57,7 @@
 # Parameters
 # ==========
 # Program version
-Pversion=1.4
+Pversion=1.5
 # Set log parameter
 OUTPUT=/var/log/tor/torchk.log
 # Set output file parameter
