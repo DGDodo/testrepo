@@ -14,6 +14,17 @@
 # More info, email: torrouter@proton.me
 
 # v1.5 initial OpenWrt v25.12.x release
+# - Changed opkg check to apk check, within program.
+
+# Used and adjusted files:
+# - /etc/tor/torchk.sh                  - Folder holds 'this script'
+# - /var/log/tor/torchk.log             - The actual torchk 'log file'
+# - /tmp/torchk.html                    - Holds 'collected data'
+# - /etc/crontabs/root                  - System crontab file (is being adjusted)
+# - /tmp/root.tmp                       - Temporary crontab file (is deleted)
+# Used programs:
+# - apk
+# - curl
 
 # v1.4 (Final release TorRouter 24.10.5 with torset_v1.7.sh)
 # - Use of function(s) for LED changes in the program
@@ -25,18 +36,12 @@
 #   WHW03 is blue but trigger status says "none" Changed in builds: /etc/rc.local
 #   F4040 is as required (Info LED off)
 
-# Used:
-# - /etc/tor/torchk.sh                  - Folder holds 'this script'
-# - /var/log/tor/torchk.log             - The actual 'log file'
-# - /tmp/torchk.html                    - Holds 'collected data'
-# - /etc/crontabs/root                  - System crontab file (to be adjusted)
-# - /tmp/root.tmp                       - Temporary crontab file (is deleted)
-
 # v1.3 (Final release TorRouter 24.10.4 with torset_v1.6.sh)
 # - Adjust LED according status (device independent, F4040 & WHW03)
 # - Use same log location for torchk.log as Tor: /var/log/tor/
 #   Every reboot a new torchk log.
 #   Needs also 'Custom Commands' change in torset_v1.6.sh (Done)
+
 # v1.2 (primairy release)
 # - Added curl check if installed
 # - Added /etc/tor/torchk.log (output of script)
@@ -61,8 +66,15 @@ filestr1=/tmp/torchk.html
 if [ -f $filestr1 ]; then rm $filestr1; fi
 # Get program ID
 progid=$$
+# Check if needed programs are available
+# apk & curl
+vTest=$(apk list --installed | grep apk | cut -d"-" -f3- | cut -d" " -f1)
+if [ ${#vTest} -eq 0 ]; then 
+  echo "TorRouter Check needs package apk to run."
+  exit;
+fi
 # Get curl version
-vCurl=$(opkg list-installed | grep 'curl - ' | cut -c8-)
+vCurl=$(apk list --installed | grep curl | cut -d"-" -f2- | cut -d" " -f1)
 if [ ${#vCurl} -eq 0 ]; then progid=0; fi
 # We now use board_name instead of model, due to capitals in string 'model'.
 # There is difference in OpenWrt versions (P2812) and device model name.
